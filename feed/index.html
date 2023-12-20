@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://frankgp.com/component/layout.js" type="module"></script>
+    <title>CodePen - Instagram Basic Display API</title>
+    <style>
+      .container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* Three columns with equal width */
+        padding: 20px; /* Add padding if needed */
+      }
+
+      .container img {
+        max-width: 100%; /* Ensure images don't exceed the container width */
+        height: auto; /* Maintain the aspect ratio of the images */
+        float: left;
+      }
+      hr {
+        margin: 1vh auto;
+      }
+    </style>
+    <script src="https://frankgp.com/component/stat.js" type="module"></script>
+  </head>
+  <body>
+    <script src="https://frankgp.com/component/loader.js"></script>
+    <main>
+      <h2>Feed Instagram</h2>
+      <a class="btn" href="https://codepen.io/frank-gp/pen/LYMwrqa" target="_blank" rel="noopener noreferrer">CodePen</a>
+      <br />
+      <!-- Input for Access Token -->
+      <label for="accessToken">Access Token:</label>
+      <br />
+      <input type="text" id="accessToken" placeholder="Enter your access token" />
+      <button onclick="loadInstagramFeed()">Load Feed</button>
+      <br />
+
+      <hr />
+
+      <div class="container"></div>
+
+      <script>
+        function loadInstagramFeed() {
+          let host = "https://graph.instagram.com/me/media?";
+          let path = "fields=media_url,permalink&access_token=";
+          var accessToken = document.getElementById("accessToken").value;
+
+          var json;
+
+          if (accessToken) {
+            json = host + path + accessToken;
+          } else {
+            json = "https://fgp.one/feed/get-data";
+          }
+
+          fetch(json)
+            .then((response) => response.json())
+            .then((dataArray) => {
+              console.log(dataArray);
+              document.querySelector(".container").innerHTML = "";
+              dataArray.data.forEach((element) => {
+                document.querySelector(".container").innerHTML += `
+        <a href="${element.permalink}" target="_blank">
+          <img src='${element.media_url}'>
+        </a>
+        `;
+              });
+            });
+        }
+        loadInstagramFeed();
+      </script>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://frankgp.com/component/layout.js" type="module"></script>
+    <title>Image Gallery</title>
+    <style>
+      #imageContainer {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        gap: 1em;
+      }
+      #imageContainer > div {
+        max-width: 20rem;
+        margin: 5px;
+        border: 1px solid #0004;
+        padding: 1em;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+      }
+      .button-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1em;
+      }
+      .button-container button {
+        margin-right: 5px;
+      }
+      button {
+        cursor: pointer;
+        margin-bottom: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h2>Uploaded Images</h2>
+      <div id="imageContainer"></div>
+
+      <script>
+        // Function to fetch and display the list of uploaded images
+        function fetchImages() {
+          // Get the current base URL
+
+          fetch(`./images`)
+            .then((response) => response.json())
+            .then((images) => {
+              const imageContainer = document.getElementById("imageContainer");
+              imageContainer.innerHTML = ""; // Clear previous entries
+
+              images.forEach((image) => {
+                const img = document.createElement("img");
+                img.src = `./${image}`; // Updated line
+                img.alt = image;
+
+                const fileNameContainer = document.createElement("div");
+                fileNameContainer.textContent = image;
+
+                const copyLinkButton = document.createElement("button");
+                copyLinkButton.textContent = "Copy Link";
+                copyLinkButton.onclick = function () {
+                  copyImageLink(image);
+                };
+
+                const imageDiv = document.createElement("div");
+                imageDiv.innerHTML = `
+                <img src="./${image}" alt="${image}" onclick="openImageInNewTab('${image}')" loading="lazy"/>              
+                <div>
+                  <span>${image}</span>
+                  <button onclick="copyImageLink('${image}')">Copy Link</button>
+                </div>
+              `;
+
+                imageContainer.appendChild(imageDiv);
+              });
+            })
+            .catch((error) => console.error(`Error fetching images: ${error.message}`));
+        }
+
+        // Function to open an image in a new tab
+        function openImageInNewTab(filename) {
+          const imageUrl = `./${filename}`;
+          window.open(imageUrl, "_blank");
+        }
+
+        // Function to copy the image link to the clipboard
+        function copyImageLink(filename) {
+          const imageUrl = `./${filename}`;
+          const tempInput = document.createElement("input");
+          document.body.appendChild(tempInput);
+          tempInput.value = imageUrl;
+          tempInput.select();
+          document.execCommand("copy");
+          document.body.removeChild(tempInput);
+
+          // alert('Image link copied to clipboard!');
+        }
+
+        // Initial fetch of images
+        fetchImages();
+      </script>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- <script src="https://frankgp.com/stats/send.js" type="module"></script> -->
+    <script src="https://frankgp.com/component/layout.js" type="module"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener with NodeJS</title>
+    <style>
+      table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        color: #000;
+      }
+
+      button {
+        margin: 10px;
+        display: none; /* Initially hide the button */
+      }
+      h1 {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body ondblclick="toggleButtonVisibility()">
+    <main>
+      <h1>URL Shortener with NodeJS</h1>
+
+      <!-- <button id="resetButton" onclick="resetVisits()">Reset All Visits</button> -->
+
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('visits')">Visits</th>
+            <th onclick="sortTable('shortUrl')">Short URL</th>
+            <th onclick="sortTable('longUrl')">Long URL</th>
+          </tr>
+        </thead>
+        <tbody id="urlTableBody">
+          <!-- Table rows will be dynamically generated here -->
+        </tbody>
+      </table>
+
+      <script>
+        let currentSortColumn = "visits";
+        let sortDirection = "desc";
+
+        async function fetchData() {
+          try {
+            const response = await fetch("/get-data");
+            const data = await response.json();
+            updateTable(data);
+          } catch (error) {
+            console.error("Error fetching data:", error);
+          }
+        }
+
+        function updateTable(data) {
+          const tableBody = document.getElementById("urlTableBody");
+          tableBody.innerHTML = "";
+
+          // Sort the data based on the current column and direction
+          const sortedData = sortData(data, currentSortColumn, sortDirection);
+
+          Object.keys(sortedData).forEach((shortUrl) => {
+            const { visits, longUrl } = sortedData[shortUrl];
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+          <td>${visits}</td>
+          <td><a href="/${shortUrl}" target="_blank">${shortUrl}</a></td>
+          <td>${longUrl}</td>
+        `;
+
+            tableBody.appendChild(row);
+          });
+        }
+
+        function sortTable(column) {
+          // Toggle the sort direction if clicking on the same column
+          if (column === currentSortColumn) {
+            sortDirection = sortDirection === "asc" ? "desc" : "asc";
+          } else {
+            // Reset the sort direction if clicking on a different column
+            currentSortColumn = column;
+            sortDirection = "asc";
+          }
+
+          fetchData(); // Refresh the table after sorting
+        }
+
+        // Sort the data based on the specified column and direction
+        function sortData(data, column, direction) {
+          return Object.entries(data)
+            .sort((a, b) => {
+              const aValue = column === "shortUrl" ? a[0] : a[1][column];
+              const bValue = column === "shortUrl" ? b[0] : b[1][column];
+
+              if (direction === "asc") {
+                return aValue > bValue ? 1 : -1;
+              } else {
+                return aValue < bValue ? 1 : -1;
+              }
+            })
+            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+        }
+
+        async function resetVisits() {
+          try {
+            const response = await fetch("/reset-visits", { method: "POST" });
+            if (response.ok) {
+              console.log("All visit counts reset to 0.");
+              fetchData(); // Refresh the table after resetting visits
+            } else {
+              console.error("Failed to reset visit counts.");
+            }
+          } catch (error) {
+            console.error("Error resetting visit counts:", error);
+          }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+          fetchData();
+        });
+
+        // Toggle the visibility of the button
+        // function toggleButtonVisibility() {
+        //   const button = document.getElementById("resetButton");
+        //   button.style.display = button.style.display === "none" ? "block" : "none";
+        // }
+      </script>
+    </main>
+  </body>
+</html>

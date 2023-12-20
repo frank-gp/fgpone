@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://frankgp.com/component/layout.js" type="module"></script>
+    <title>Image Visit Counts</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 50%;
+        margin: 20px auto;
+      }
+
+      th,
+      td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      button {
+        display: block;
+        margin: 20px auto;
+        padding: 10px;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h2>Image Visit Counts</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Filename</th>
+            <th>Visit Count</th>
+          </tr>
+        </thead>
+        <tbody id="visitTableBody">
+          <!-- Visit counts will be dynamically added here using JavaScript -->
+        </tbody>
+      </table>
+
+      <button id="resetButton">Reset Visit Counts</button>
+
+      <script>
+        // Function to fetch visit counts, sort in descending order, and update the table
+        function fetchVisitCounts() {
+          fetch("./visit")
+            .then((response) => response.json())
+            .then((visitCounts) => {
+              // Sort visit counts array in descending order by count
+              visitCounts.sort((a, b) => b.count - a.count);
+
+              const tableBody = document.getElementById("visitTableBody");
+
+              // Clear existing rows
+              tableBody.innerHTML = "";
+
+              visitCounts.forEach((entry) => {
+                const row = tableBody.insertRow();
+                const filenameCell = row.insertCell(0);
+                const countCell = row.insertCell(1);
+
+                filenameCell.textContent = entry.filename;
+                countCell.textContent = entry.count;
+              });
+            })
+            .catch((error) => console.error("Error fetching visit counts:", error));
+        }
+
+        // Attach event listener to the reset button
+        document.getElementById("resetButton").addEventListener("click", () => {
+          // Send a request to the server to reset visit counts
+          fetch("/reset-visit", { method: "POST" })
+            .then(() => {
+              // After resetting, fetch and update visit counts
+              fetchVisitCounts();
+            })
+            .catch((error) => console.error("Error resetting visit counts:", error));
+        });
+
+        // Initial fetch and display of visit counts
+        fetchVisitCounts();
+      </script>
+    </main>
+  </body>
+</html>

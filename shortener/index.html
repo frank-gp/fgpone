@@ -36,9 +36,9 @@
       }
     </style>
   </head>
-  <body ondblclick="toggleButtonVisibility()">
+  <body>
     <main>
-      <h1>URL Shortener with NodeJS</h1>
+      <h1>URL Shortener with NodeJS | <span id="rows"></span></h1>
 
       <!-- <button id="resetButton" onclick="resetVisits()">Reset All Visits</button> -->
 
@@ -64,6 +64,10 @@
             const response = await fetch("/get-data");
             const data = await response.json();
             updateTable(data);
+
+            const spanRows = document.querySelector("#rows");
+            const tableRows = document.querySelector("table").rows.length;
+            spanRows.textContent = tableRows;
           } catch (error) {
             console.error("Error fetching data:", error);
           }

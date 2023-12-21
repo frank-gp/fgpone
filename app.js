@@ -15,6 +15,9 @@ mainApp.use(cors());
 const appDev = require("./appDev/app");
 mainApp.use("/appDev", appDev);
 
+const login = require("./login/app");
+mainApp.use("/login", login);
+
 const stat = require("./stat/app");
 mainApp.use("/stat", stat);
 

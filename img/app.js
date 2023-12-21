@@ -42,6 +42,27 @@ const upload = multer({ storage: storage });
 // Serve uploaded images
 // app.use("/", express.static("img/uploads"));
 
+// ========== login... ==========
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: true }));
+const users = [{ username: "fgp555", password: "Electron5.pe" }];
+
+app.get("/admin", (req, res) => {
+  res.sendFile(__dirname + "/private/admin-login.html");
+});
+
+app.post("/admin", (req, res) => {
+  const { username, password } = req.body;
+  const user = users.find((u) => u.username === username && u.password === password);
+  if (user) {
+    const adminPath = path.join(__dirname, "private", "admin.html");
+    res.sendFile(adminPath);
+  } else {
+    res.send("Login failed");
+  }
+});
+// ========== login. ==========
+
 // Route to display the HTML form
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
@@ -57,9 +78,9 @@ app.post("/reset-visit", (req, res) => {
   res.send("Visit counts reset successfully!");
 });
 
-app.get("/upload", (req, res) => {
-  res.sendFile(path.join(__dirname, "upload.html"));
-});
+// app.get("/upload", (req, res) => {
+//   res.sendFile(path.join(__dirname, "upload.html"));
+// });
 
 // Route to handle image uploads (changed to use 'images' field for multiple files)
 app.post("/upload", upload.array("images"), (req, res) => {

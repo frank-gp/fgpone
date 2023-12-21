@@ -7,6 +7,7 @@ const app = express();
 
 // Parse JSON bodies
 app.use(bodyParser.json());
+app.use(express.static(__dirname))
 
 // Serve the HTML file
 app.get("/submit", (req, res) => {

@@ -28,13 +28,46 @@ async function saveData(data) {
     console.error("Error saving data:", error);
   }
 }
+// ========== login... ==========
+const users = [{ username: "fgp555", password: "Electron5.pe" }];
+
+shortenerApp.get("/admin", (req, res) => {
+  res.sendFile(__dirname + "/private/admin-login.html");
+});
+
+shortenerApp.post("/admin", (req, res) => {
+  const { username, password } = req.body;
+  const user = users.find((u) => u.username === username && u.password === password);
+  if (user) {
+    const adminPath = path.join(__dirname, "private", "admin.html");
+    res.sendFile(adminPath);
+  } else {
+    res.send("Login failed");
+  }
+});
+// ========== 2 ==========
+shortenerApp.get("/upload", (req, res) => {
+  res.sendFile(__dirname + "/private/upload-login.html");
+});
+
+shortenerApp.post("/upload", (req, res) => {
+  const { username, password } = req.body;
+  const user = users.find((u) => u.username === username && u.password === password);
+  if (user) {
+    const uploadPath = path.join(__dirname, "private", "upload.html");
+    res.sendFile(uploadPath);
+  } else {
+    res.send("Login failed");
+  }
+});
+// ========== login. ==========
 
 // GET routes
 shortenerApp.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
 
-shortenerApp.get("/upload", (req, res) => res.sendFile(path.join(__dirname, "upload.html")));
+// shortenerApp.get("/upload", (req, res) => res.sendFile(path.join(__dirname, "upload.html")));
 
-shortenerApp.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "admin.html")));
+// shortenerApp.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "admin.html")));
 
 shortenerApp.get("/get-data", async (req, res) => res.json(await loadData()));
 
@@ -77,7 +110,7 @@ shortenerApp.post("/create", async (req, res) => {
   res.json({ shortUrl: shortUrlWithHost });
 });
 
-shortenerApp.post("/upload", async (req, res) => {
+shortenerApp.post("/upload-data", async (req, res) => {
   try {
     const uploadedData = req.body;
 

@@ -2,186 +2,187 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ToDo App</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://frankgp.com/component/layout.js" type="module"></script>
+    <title>ToDo App</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
 
-    #todoList {
-      max-width: 400px;
-      margin: 20px auto;
-    }
+      #todoList {
+        max-width: 400px;
+        margin: 20px auto;
+      }
 
-    .todoItem {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border: 1px solid #ccc;
-      padding: 8px;
-      margin-bottom: 8px;
-      cursor: pointer;
-    }
+      .todoItem {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #ccc;
+        padding: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+      }
 
-    .deleteBtn {
-      cursor: pointer;
-      color: red;
-    }
+      .deleteBtn {
+        cursor: pointer;
+        color: red;
+      }
 
-    #addTodoForm {
-      max-width: 400px;
-      margin: 20px auto;
-      display: flex;
-    }
+      #addTodoForm {
+        max-width: 400px;
+        margin: 20px auto;
+        display: flex;
+      }
 
-    #newTodoInput {
-      flex: 1;
-      padding: 8px;
-    }
+      #newTodoInput {
+        flex: 1;
+        padding: 8px;
+      }
 
-    #addTodoBtn {
-      margin-left: 8px;
-      padding: 8px;
-      cursor: pointer;
-    }
+      #addTodoBtn {
+        margin-left: 8px;
+        padding: 8px;
+        cursor: pointer;
+      }
 
-    .done {
-      text-decoration: line-through;
-      background-color: peru;
-    }
-  </style>
-</head>
-<body>
+      .done {
+        text-decoration: line-through;
+        background-color: peru;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>ToDo App</h1>
 
-  <h1>ToDo App</h1>
+      <div id="addTodoForm">
+        <input type="text" id="newTodoInput" placeholder="Add a new ToDo" />
+        <button id="addTodoBtn" onclick="addTodo()">Add</button>
+      </div>
 
-  <div id="addTodoForm">
-    <input type="text" id="newTodoInput" placeholder="Add a new ToDo">
-    <button id="addTodoBtn" onclick="addTodo()">Add</button>
-  </div>
+      <div id="todoList">
+        <!-- ToDo items will be added here dynamically -->
+      </div>
 
-  <div id="todoList">
-    <!-- ToDo items will be added here dynamically -->
-  </div>
+      <script>
+        const todoListContainer = document.getElementById("todoList");
+        const newTodoInput = document.getElementById("newTodoInput");
 
-  <script>
-    const todoListContainer = document.getElementById('todoList');
-    const newTodoInput = document.getElementById('newTodoInput');
-
-    async function fetchTodos() {
-      const response = await fetch('./todos');
-      const todos = await response.json();
-      return todos;
-    }
-
-    function renderTodos(todos) {
-      todoListContainer.innerHTML = '';
-
-      todos.forEach(todo => {
-        const todoItem = document.createElement('div');
-        todoItem.className = 'todoItem';
-
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = todo.done;
-        checkbox.addEventListener('change', () => toggleTodoStatus(todo.id, checkbox.checked));
-
-        const todoText = document.createElement('span');
-        todoText.className = todo.done ? 'done' : '';
-        todoText.innerText = todo.text;
-        todoText.ondblclick = () => editTodo(todoText, todo.id);
-
-        const deleteBtn = document.createElement('span');
-        deleteBtn.className = 'deleteBtn';
-        deleteBtn.innerHTML = '&#10006;';
-        deleteBtn.onclick = () => deleteTodo(todo.id);
-
-        todoItem.appendChild(checkbox);
-        todoItem.appendChild(todoText);
-        todoItem.appendChild(deleteBtn);
-
-        todoListContainer.appendChild(todoItem);
-      });
-    }
-
-    async function addTodo() {
-      const newTodoText = newTodoInput.value;
-
-      if (newTodoText) {
-        const response = await fetch('./todos', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ text: newTodoText }),
-        });
-
-        if (response.ok) {
-          const todos = await fetchTodos();
-          renderTodos(todos);
-          newTodoInput.value = '';
+        async function fetchTodos() {
+          const response = await fetch("./todos");
+          const todos = await response.json();
+          return todos;
         }
-      }
-    }
 
-    async function deleteTodo(todoId) {
-      const response = await fetch(`./todos/${todoId}`, {
-        method: 'DELETE',
-      });
+        function renderTodos(todos) {
+          todoListContainer.innerHTML = "";
 
-      if (response.ok) {
-        const todos = await fetchTodos();
-        renderTodos(todos);
-      }
-    }
+          todos.forEach((todo) => {
+            const todoItem = document.createElement("div");
+            todoItem.className = "todoItem";
 
-    function editTodo(element, todoId) {
-      const text = element.innerText;
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.value = text;
-      input.addEventListener('blur', () => saveEditedTodo(input, todoId));
-      element.innerHTML = '';
-      element.appendChild(input);
-      input.focus();
-    }
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = todo.done;
+            checkbox.addEventListener("change", () => toggleTodoStatus(todo.id, checkbox.checked));
 
-    async function saveEditedTodo(input, todoId) {
-      const newText = input.value;
-      const response = await fetch(`./todos/${todoId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: newText }),
-      });
+            const todoText = document.createElement("span");
+            todoText.className = todo.done ? "done" : "";
+            todoText.innerText = todo.text;
+            todoText.ondblclick = () => editTodo(todoText, todo.id);
 
-      if (response.ok) {
-        const todos = await fetchTodos();
-        renderTodos(todos);
-      }
-    }
+            const deleteBtn = document.createElement("span");
+            deleteBtn.className = "deleteBtn";
+            deleteBtn.innerHTML = "&#10006;";
+            deleteBtn.onclick = () => deleteTodo(todo.id);
 
-    async function toggleTodoStatus(todoId, isDone) {
-      const response = await fetch(`./todos/${todoId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ done: isDone }),
-      });
+            todoItem.appendChild(checkbox);
+            todoItem.appendChild(todoText);
+            todoItem.appendChild(deleteBtn);
 
-      if (response.ok) {
-        const todos = await fetchTodos();
-        renderTodos(todos);
-      }
-    }
+            todoListContainer.appendChild(todoItem);
+          });
+        }
 
-    fetchTodos().then(todos => renderTodos(todos));
-  </script>
+        async function addTodo() {
+          const newTodoText = newTodoInput.value;
 
-</body>
+          if (newTodoText) {
+            const response = await fetch("./todos", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ text: newTodoText }),
+            });
+
+            if (response.ok) {
+              const todos = await fetchTodos();
+              renderTodos(todos);
+              newTodoInput.value = "";
+            }
+          }
+        }
+
+        async function deleteTodo(todoId) {
+          const response = await fetch(`./todos/${todoId}`, {
+            method: "DELETE",
+          });
+
+          if (response.ok) {
+            const todos = await fetchTodos();
+            renderTodos(todos);
+          }
+        }
+
+        function editTodo(element, todoId) {
+          const text = element.innerText;
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = text;
+          input.addEventListener("blur", () => saveEditedTodo(input, todoId));
+          element.innerHTML = "";
+          element.appendChild(input);
+          input.focus();
+        }
+
+        async function saveEditedTodo(input, todoId) {
+          const newText = input.value;
+          const response = await fetch(`./todos/${todoId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ text: newText }),
+          });
+
+          if (response.ok) {
+            const todos = await fetchTodos();
+            renderTodos(todos);
+          }
+        }
+
+        async function toggleTodoStatus(todoId, isDone) {
+          const response = await fetch(`./todos/${todoId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ done: isDone }),
+          });
+
+          if (response.ok) {
+            const todos = await fetchTodos();
+            renderTodos(todos);
+          }
+        }
+
+        fetchTodos().then((todos) => renderTodos(todos));
+      </script>
+    </main>
+  </body>
 </html>

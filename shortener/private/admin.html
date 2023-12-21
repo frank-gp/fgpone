@@ -6,28 +6,14 @@
     <script src="https://frankgp.com/component/layout.js" type="module"></script>
     <title>URL Shortener</title>
     <style>
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 20px;
-      }
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      form {
-        margin-top: 20px;
+      .buttons {
+        display: flex;
       }
     </style>
   </head>
   <body>
     <main>
-      <h1>URL Shortener</h1>
+      <h1>URL Shortener | <span id="rows"></span></h1>
 
       <!-- Form for resetting visits -->
       <form id="resetVisitsForm">
@@ -39,10 +25,10 @@
       <!-- Form for POST -->
       <form id="addForm">
         <h2>Add URL</h2>
-        <label for="longUrl">Long URL:</label>
-        <input type="text" id="longUrl" name="longUrl" required />
         <label for="customBackHalf">Custom Back Half (optional):</label>
         <input type="text" id="customBackHalf" name="customBackHalf" />
+        <label for="longUrl">Long URL:</label>
+        <input type="text" id="longUrl" name="longUrl" required />
         <button type="submit">Add URL</button>
       </form>
 
@@ -60,9 +46,9 @@
       <table id="urlTable">
         <thead>
           <tr>
+            <th onclick="sortColumn('visits')">Visits</th>
             <th onclick="sortColumn('shortUrl')">Short URL</th>
             <th onclick="sortColumn('longUrl')">Long URL</th>
-            <th onclick="sortColumn('visits')">Visits</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -100,14 +86,19 @@
             for (const shortUrl in data) {
               const urlData = data[shortUrl];
               const row = urlTable.insertRow(-1);
-              row.insertCell(0).innerHTML = `<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
-              row.insertCell(1).textContent = urlData.longUrl;
-              row.insertCell(2).textContent = urlData.visits || 0;
+              row.insertCell(0).textContent = urlData.visits || 0;
+              row.insertCell(1).innerHTML = `<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+              row.insertCell(2).textContent = urlData.longUrl;
               row.insertCell(3).innerHTML = `
-            <button onclick="updateUrl('${shortUrl}', '${urlData.longUrl}')">Update</button>
-            <button onclick="deleteUrl('${shortUrl}')">Delete</button>
-          `;
+    <div class="buttons">
+      <button onclick="updateUrl('${shortUrl}', '${urlData.longUrl}')">✏️</button>
+      <button onclick="deleteUrl('${shortUrl}')">❌</button>
+    </div>`;
             }
+
+            const spanRows = document.querySelector("#rows");
+            const tableRows = document.querySelector("table").rows.length;
+            spanRows.textContent = tableRows;
           } catch (error) {
             console.error("Error fetching data:", error);
           }
@@ -266,13 +257,14 @@
             for (const shortUrl in sortedData) {
               const urlData = sortedData[shortUrl];
               const row = urlTable.insertRow(-1);
-              row.insertCell(0).innerHTML = `<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
-              row.insertCell(1).textContent = urlData.longUrl;
-              row.insertCell(2).textContent = urlData.visits || 0;
+              row.insertCell(0).textContent = urlData.visits || 0;
+              row.insertCell(1).innerHTML = `<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+              row.insertCell(2).textContent = urlData.longUrl;
               row.insertCell(3).innerHTML = `
-        <button onclick="updateUrl('${shortUrl}', '${urlData.longUrl}')">Update</button>
-        <button onclick="deleteUrl('${shortUrl}')">Delete</button>
-      `;
+    <div class="buttons">
+      <button onclick="updateUrl('${shortUrl}', '${urlData.longUrl}')">✏️</button>
+      <button onclick="deleteUrl('${shortUrl}')">❌</button>
+    </div>`;
             }
           } catch (error) {
             console.error("Error fetching data:", error);

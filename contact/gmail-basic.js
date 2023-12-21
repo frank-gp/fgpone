@@ -1,15 +1,16 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
+require("dotenv").config();
+
 
 const app = express();
-const GMAIL_PASS_APP = process.env.GMAIL_PASS_APP;
 
 // Set up Nodemailer transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'fgp555@gmail.com',
-    pass: GMAIL_PASS_APP,
+    pass: process.env.GMAIL_PASS_APP,
   },
 });
 

@@ -41,7 +41,7 @@
       <h2>Upload Images</h2>
       <a href="visits" target="_blank"><button>visits track stat</button></a>
 
-      <a href="down" target="_blank"><button>Download all</button></a>
+      <a href="download" target="_blank"><button>Download all</button></a>
       <hr />
 
       <form id="uploadForm">
@@ -91,6 +91,8 @@
         function fetchImages() {
           // Get the current base URL
           const baseURL = window.location.origin;
+          // const baseURL = ".";
+          // const baseURL = location.href;
 
           fetch(`${baseURL}/img/images`)
             .then((response) => response.json())
@@ -121,12 +123,12 @@
 
                 const imageDiv = document.createElement("div");
                 imageDiv.innerHTML = `
-              <img src="${baseURL}/img/${image}" alt="${image}" onclick="openImageInNewTab('${image}')"/>
+              <img src="${baseURL}/img/${image}" alt="${image}" onclick="openImageInNewTab('img/${image}')"/>
               <div>
                 <span>${image}</span>
                 <div class="button-container">
                   <button onclick="deleteImage('${image}')">Delete</button>
-                  <button onclick="copyImageLink('${image}')">Copy Link</button>
+                  <button onclick="copyImageLink('img/${image}')">Copy Link</button>
                 </div>
               </div>
             `;
@@ -140,9 +142,9 @@
         // Function to delete an image
         function deleteImage(filename) {
           // Get the current base URL
-          const baseURL = window.location.origin;
+          // const baseURL = window.location.origin;
 
-          fetch(`${baseURL}/delete/${filename}`, {
+          fetch(`delete/${filename}`, {
             method: "DELETE",
           })
             .then((response) => response.text())

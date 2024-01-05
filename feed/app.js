@@ -3,7 +3,7 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors'); // Import cors module
-require('dotenv').config();
+// require('dotenv').config();
 
 const router = express.Router();
 
@@ -30,12 +30,12 @@ function fetchDataAndSave() {
     .then(response => {
       const data = response.data;
 
-      const filePath = path.join(__dirname, 'data.json');
+      const filePath = path.join(__dirname, 'dataFeed.json');
       fs.writeFile(filePath, JSON.stringify(data, null, 2), (err) => {
         if (err) {
-          console.error('Error writing to data.json', err);
+          console.error('Error writing to dataFeed.json', err);
         } else {
-          console.log('Data saved to data.json');
+          console.log('Data saved to dataFeed.json');
         }
       });
     })
@@ -45,10 +45,10 @@ function fetchDataAndSave() {
 }
 
 router.get('/get-data', (req, res) => {
-  const filePath = path.join(__dirname, 'data.json');
+  const filePath = path.join(__dirname, 'dataFeed.json');
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
-      console.error('Error reading data.json', err);
+      console.error('Error reading dataFeed.json', err);
       res.status(500).send('Internal Server Error');
     } else {
       res.json(JSON.parse(data));

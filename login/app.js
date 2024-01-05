@@ -5,8 +5,11 @@ const path = require("path");
 const app = express();
 
 // ========== login... ==========
+const username = process.env.USER;
+const password = process.env.PASSWORD;
 app.use(bodyParser.urlencoded({ extended: true }));
-const users = [{ username: "fgp555", password: "Electron5.pe" }];
+const users = [{ username, password }];
+// console.log(users)
 
 app.get("/admin", (req, res) => {
   res.sendFile(__dirname + "/private/admin-login.html");

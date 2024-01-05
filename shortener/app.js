@@ -5,7 +5,7 @@ const fs = require("fs/promises");
 const path = require("path");
 
 const shortenerApp = express();
-const dataFilePath = path.join(__dirname, "data.json");
+const dataFilePath = path.join(__dirname, "dataShortener.json");
 
 shortenerApp.use(bodyParser.urlencoded({ extended: true }));
 shortenerApp.use(bodyParser.json());
@@ -29,7 +29,10 @@ async function saveData(data) {
   }
 }
 // ========== login... ==========
-const users = [{ username: "fgp555", password: "Electron5.pe" }];
+const username = process.env.USER;
+const password = process.env.PASSWORD;
+const users = [{ username, password }];
+// console.log(users)
 
 shortenerApp.get("/admin", (req, res) => {
   res.sendFile(__dirname + "/private/admin-login.html");
@@ -71,7 +74,8 @@ shortenerApp.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.htm
 
 shortenerApp.get("/get-data", async (req, res) => res.json(await loadData()));
 
-shortenerApp.get("/download", (req, res) => res.download(dataFilePath, "data.json"));
+shortenerApp.get("/download", (req, res) => res.download(dataFilePath, "dataShortener.json"));
+
 
 shortenerApp.get("/:shortUrl", async (req, res) => {
   const { shortUrl } = req.params;
@@ -83,9 +87,12 @@ shortenerApp.get("/:shortUrl", async (req, res) => {
     await saveData(data);
     res.redirect(urlData.longUrl);
   } else {
-    res.end("hello");
+    // Assuming your 404.html file is in the root directory of your project
+    const filePath = path.join(__dirname, '404.html');
+    res.status(404).sendFile(filePath);
   }
 });
+
 
 // POST routes
 shortenerApp.post("/reset-visits", async (req, res) => {

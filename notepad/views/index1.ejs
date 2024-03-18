@@ -69,18 +69,7 @@
         <!-- <p><span class="itemID">ID: <%= item.id %></span> | <span>Name: <%= item.name %></span></p>
       <button class="copy-btn">Copy</button> -->
 
-        <!-- <pre><code><%= item.textarea %></code></pre> -->
-
-        <div class="container">
-          <div class="line-numbers">
-            <span></span>
-            <!-- Line numbers will be generated here -->
-          </div>
-          <div class="code-editor">
-            <pre><code class="code"><%= item.textarea %></code></pre>
-          </div>
-        </div>
-        
+        <pre><code><%= item.textarea %></code></pre>
       </div>
       <% }); %> <% } else { %>
       <p>No data available.</p>
@@ -89,85 +78,7 @@
       <!-- ========== highlight Component... ========== -->
       <script src="https://frankgp.com/lib/highlight.js" type="module"></script>
       <!-- ========== highlight Component. ========== -->
-<!-- ========== temp... ========== -->
-<style>
-  * {
-    font-family: monospace;
-    /* font-size: 16px; */
-    margin: 0;
-    padding: 0;
-  }
 
-  body {
-    font-family: Arial, sans-serif;
-  }
-
-  .container {
-    display: flex;
-    margin-bottom: 1em;
-    max-width: 100%;
-    overflow-x: auto;
-  }
-
-  .line-numbers {
-    counter-reset: line;
-    padding: 10px;
-    background-color: #f0f0f0;
-    background-color: #001;
-  }
-
-  .line-numbers span {
-    counter-increment: line;
-    display: block;
-  }
-
-  .line-numbers span:before {
-    content: counter(line);
-    display: inline-block;
-    width: 20px;
-    text-align: right;
-    margin-right: 5px;
-    color: #999;
-  }
-
-  .code-editor {
-    flex-grow: 1;
-    position: relative;
-  }
-
-  .code-editor code {
-    /* width: 100%; */
-    /* padding: 10px; */
-    font-family: monospace;
-    /* border: 1px solid #ccc; */
-    /* background-color: #f9f9f9; */
-    /* white-space: pre-wrap; */
-  }
-
-  pre code.hljs {
-    padding: 10px !important;
-  }
-</style>
-
-<!-- ========== temp. ========== -->
-      <!-- ========== number... ========== -->
-      <script>
-        function updateLineNumbers() {
-          const codeElements = document.querySelectorAll(".code");
-          codeElements.forEach((codeElement) => {
-            const lines = codeElement.textContent.split("\n").length;
-            const lineNumbersWrapper = codeElement.closest(".container").querySelector(".line-numbers");
-            lineNumbersWrapper.innerHTML = "";
-            for (let i = 1; i <= lines; i++) {
-              const span = document.createElement("span");
-              lineNumbersWrapper.appendChild(span);
-            }
-          });
-        }
-        // Initial line numbers update
-        updateLineNumbers();
-      </script>
-      <!-- ========== number. ========== -->
       <!-- JavaScript to save input value to localStorage -->
       <script>
         document.addEventListener("DOMContentLoaded", function () {

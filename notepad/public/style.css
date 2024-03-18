@@ -1,3 +1,4 @@
+@import url(https://frankgp.com/lib/btn.css);
 * {
   box-sizing: border-box;
   color: #666;
@@ -41,4 +42,39 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* ========== button ========== */
+.copy-btn {
+  transition: opacity 0.3s ease-in-out; /* Adding transition effect */
+  background-color: #000;
+  color: white;
+}
+
+@keyframes fade {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.copy-btn-animation {
+  animation: fade 1s infinite; /* Apply animation */
+}
+
+.delete-button {
+  background-color: red;
+  color: white;
+}
+
+input::placeholder,
+textarea::placeholder {
+  /* Your styles here */
+  color: #bbb; /* Placeholder text color */
+  font-style: italic; /* Placeholder font style */
 }

@@ -34,6 +34,9 @@ mainApp.use("/todo", todo);
 const { router } = require("./feed/app");
 mainApp.use("/feed", router);
 
+const notepad = require("./notepad/app");
+mainApp.use("/notepad", notepad);
+
 const shortener = require("./shortener/app");
 mainApp.use("/", shortener);
 

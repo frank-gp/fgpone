@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NotepadJS App</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <h1>NotepadJS App</h1>
+    <!-- <form action="./" method="post">
+      <input type="text" name="name" id="name" placeholder="Name" />
+      <br />
+      <textarea name="content" id="content" rows="10" cols="50" placeholder="Content"></textarea>
+      <br />
+      <button type="submit">Submit</button>
+    </form> -->
+
+    <form id="myForm">
+      <input type="text" name="name" id="name" placeholder="Name" value="name" />
+      <br />
+      <textarea name="content" id="content" rows="10" cols="50" placeholder="Content">Content</textarea>
+      <br />
+      <button type="submit">Submit</button>
+    </form>
+
+    <script>
+      document.getElementById("myForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Get form data
+        var formData = new FormData(event.target);
+
+        // Convert form data to JSON
+        var jsonData = {};
+        formData.forEach((value, key) => {
+          jsonData[key] = value;
+        });
+        console.log(jsonData);
+
+        // Send form data to the server using fetch API
+        fetch("./", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(jsonData),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.text();
+          })
+          .then((data) => {
+            console.log(data); // Log the response from the server
+            // Optionally, you can perform additional actions based on the server response
+            location.reload();
+          })
+          .catch((error) => {
+            console.error("There was a problem with your fetch operation:", error);
+          });
+      });
+    </script>
+
+    <h2>JSON Data</h2>
+    <% if (jsonData && jsonData.length > 0) { %> <% const sortedData = JSON.parse(jsonData).sort((a, b) => b.id - a.id); %> <% sortedData.forEach((item) => { %>
+    <div class="post">
+      <p>ID: <%= item.id %></p>
+      <p>Name: <%= item.name %></p>
+      <pre><code><%= item.textarea %></code></pre>
+      <button class="delete-button" data-id="<%= item.id %>">Delete</button>
+    </div>
+    <% }); %> <% } else { %>
+    <p>No data available.</p>
+    <% } %>
+
+    <!-- ========== highlight Component... ========== -->
+    <script src="https://frankgp.com/lib/highlight.js" type="module"></script>
+    <!-- ========== highlight Component. ========== -->
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const deleteButtons = document.querySelectorAll(".delete-button");
+
+        deleteButtons.forEach((button) => {
+          button.addEventListener("click", async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const postId = button.getAttribute("data-id");
+
+            try {
+              const response = await fetch(`./delete/${postId}`, {
+                method: "DELETE",
+              });
+
+              if (!response.ok) {
+                throw new Error("Failed to delete post");
+              }
+
+              // Reload the page or update UI as necessary
+              location.reload(); // Reload the page after successful deletion
+            } catch (error) {
+              console.error("Error deleting post:", error.message);
+              // Handle error, show message to user, etc.
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

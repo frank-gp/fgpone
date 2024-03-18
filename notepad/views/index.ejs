@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NotepadJS App</title>
+    <link rel="stylesheet" href="https://frankgp.com/lib/btn.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <style>
+      .copy-btn {
+        transition: opacity 0.3s ease-in-out; /* Adding transition effect */
+        background-color: #000;
+        color: white;
+      }
+    </style>
+
+    <style>
+      @keyframes fade {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      .copy-btn-animation {
+        animation: fade 1s infinite; /* Apply animation */
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>NotepadJS App</h1>
+      <!-- <form id="myForm" action="./" method="post">
+        <input type="text" name="name" id="name" placeholder="Name" />
+        <br />
+        <textarea name="content" id="content" rows="10" cols="50" placeholder="Content"></textarea>
+        <br />
+        <button type="submit" id="notepad-form">Submit</button>
+      </form> -->
+
+      <form id="myForm">
+        <input type="text" name="name" id="name" placeholder="Name" value="name" />
+        <br />
+        <textarea name="content" id="content" rows="10" cols="50" placeholder="Content"></textarea>
+        <br />
+        <button type="submit">Submit</button>
+      </form>
+
+      <script>
+        document.getElementById("myForm").addEventListener("submit", function (event) {
+          event.preventDefault(); // Prevent the default form submission
+
+          // Get form data
+          var formData = new FormData(event.target);
+
+          // Convert form data to JSON
+          var jsonData = {};
+          formData.forEach((value, key) => {
+            jsonData[key] = value;
+          });
+          console.log(jsonData);
+
+          // Send form data to the server using fetch API
+          fetch("./", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(jsonData),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Network response was not ok");
+              }
+              return response.text();
+            })
+            .then((data) => {
+              console.log(data); // Log the response from the server
+              // Optionally, you can perform additional actions based on the server response
+              location.reload();
+            })
+            .catch((error) => {
+              console.error("There was a problem with your fetch operation:", error);
+            });
+        });
+      </script>
+
+      <h2>JSON Data</h2>
+      <% if (jsonData && jsonData.length > 0) { %> <% const sortedData = JSON.parse(jsonData).sort((a, b) => b.id - a.id); %> <% sortedData.forEach((item) => { %>
+      <div class="post">
+        <!-- Add Copy button here -->
+        <div class="head">
+          <p><span class="itemID">ID: <%= item.id %></span> | <span>Name: <%= item.name %></span></p>
+          <button class="copy-btn">Copy code</button>
+        </div>
+        <!-- <p><span class="itemID">ID: <%= item.id %></span> | <span>Name: <%= item.name %></span></p>
+      <button class="copy-btn">Copy</button> -->
+
+        <pre><code><%= item.textarea %></code></pre>
+      </div>
+      <% }); %> <% } else { %>
+      <p>No data available.</p>
+      <% } %>
+
+      <!-- ========== highlight Component... ========== -->
+      <script src="https://frankgp.com/lib/highlight.js" type="module"></script>
+      <!-- ========== highlight Component. ========== -->
+
+      <!-- JavaScript to save input value to localStorage -->
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const nameInput = document.getElementById("name");
+
+          // Load saved value from localStorage if available
+          const savedName = localStorage.getItem("savedName");
+          if (savedName) {
+            nameInput.value = savedName;
+          }
+
+          // Save value to localStorage when input changes
+          nameInput.addEventListener("input", function () {
+            localStorage.setItem("savedName", nameInput.value);
+          });
+
+          // // Prevent form submission from redirecting
+          // document.getElementById("notepad-form").addEventListener("submit", function (event) {
+          //   event.preventDefault();
+          //   // Handle form submission here if needed
+          // });
+
+          // Add event listeners for copy buttons
+          const copyButtons = document.querySelectorAll(".copy-btn");
+          copyButtons.forEach((button) => {
+            button.addEventListener("click", function () {
+              // const codeElement = this.parentElement.querySelector('code');
+              const codeElement = this.parentElement.parentElement.querySelector("code");
+
+              if (codeElement) {
+                const text = codeElement.innerText;
+                navigator.clipboard
+                  .writeText(text)
+                  .then(() => {
+                    this.textContent = "✅ Copied!";
+                    this.classList.add("copy-btn-animation");
+                    setTimeout(() => {
+                      this.textContent = "Copy code";
+                      this.classList.remove("copy-btn-animation");
+                    }, 3000);
+                  })
+                  .catch((err) => {
+                    console.error("Failed to copy:", err);
+                  });
+              }
+            });
+          });
+        });
+      </script>
+    </main>
+  </body>
+</html>

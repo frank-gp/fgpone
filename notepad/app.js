@@ -1,17 +1,17 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const router = express();
+const notepadRouter = express();
 
-router.set("view engine", "ejs");
+notepadRouter.set("view engine", "ejs");
 
 // Middleware
-router.use(express.urlencoded({ extended: true }));
-router.use(express.static(path.join(__dirname, "public")));
-router.use(express.json());
+notepadRouter.use(express.urlencoded({ extended: true }));
+notepadRouter.use(express.static(path.join(__dirname, "public")));
+notepadRouter.use(express.json());
 
 // Set the views directory
-router.set("views", path.join(__dirname, "views"));
+notepadRouter.set("views", path.join(__dirname, "views"));
 
 // const dataFilePath = "notepadData.json";
 const dataFilePath = path.join(__dirname, "notepadData.json");
@@ -21,7 +21,7 @@ if (!fs.existsSync(dataFilePath)) {
   fs.writeFileSync(dataFilePath, "[]");
 }
 
-router.get("/", (req, res) => {
+notepadRouter.get("/", (req, res) => {
   fs.readFile(dataFilePath, "utf8", (err, data) => {
     if (err) {
       console.error(err);
@@ -32,7 +32,43 @@ router.get("/", (req, res) => {
   });
 });
 
-router.post("/", (req, res) => {
+notepadRouter.get("/add", (req, res) => {
+  fs.readFile(dataFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      res.render("add", { jsonData: "" });
+      return;
+    }
+    res.render("add", { jsonData: data });
+  });
+});
+
+notepadRouter.get("/admin", (req, res) => {
+  fs.readFile(dataFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      res.render("admin", { jsonData: "" });
+      return;
+    }
+    res.render("admin", { jsonData: data });
+  });
+});
+
+// Add a route to download the JSON data
+notepadRouter.get("/download", (req, res) => {
+  fs.readFile(dataFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error downloading data");
+      return;
+    }
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader("Content-Disposition", "attachment; filename=notepadData.json");
+    res.send(data);
+  });
+});
+
+notepadRouter.post("/", (req, res) => {
   console.log(req.body);
   // res.json({ message: "Data received successfully", body: req.body });
 
@@ -69,7 +105,7 @@ router.post("/", (req, res) => {
   });
 });
 
-router.delete("/delete/:id", (req, res) => {
+notepadRouter.delete("/delete/:id", (req, res) => {
   const idToDelete = parseInt(req.params.id);
   fs.readFile(dataFilePath, "utf8", (err, data) => {
     if (err) {
@@ -94,15 +130,50 @@ router.delete("/delete/:id", (req, res) => {
   });
 });
 
-router.get("/admin", (req, res) => {
-  fs.readFile(dataFilePath, "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      res.render("admin", { jsonData: "" });
-      return;
-    }
-    res.render("admin", { jsonData: data });
-  });
+// Route to render the upload form
+notepadRouter.get("/upload", (req, res) => {
+  res.render("upload");
 });
 
-module.exports = router;
+// Route to handle uploaded JSON data
+notepadRouter.post("/upload", (req, res) => {
+  const jsonData = req.body.jsonData;
+
+  try {
+    const parsedData = JSON.parse(jsonData);
+
+    fs.readFile(dataFilePath, "utf8", (err, data) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send("Error saving data");
+        return;
+      }
+
+      let dataArray = [];
+      if (data) {
+        dataArray = JSON.parse(data);
+      }
+      // dataArray.push(...parsedData);
+
+      // Clear existing data before appending new data
+      dataArray = [];
+      // Append the parsed data to the existing array
+      dataArray.push(...parsedData);
+
+      // parsedData = dataArray;
+      fs.writeFile(dataFilePath, JSON.stringify(dataArray, null, 2), (err) => {
+        if (err) {
+          console.error(err);
+          res.status(500).send("Error saving data");
+          return;
+        }
+        res.redirect("./");
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).send("Invalid JSON data");
+  }
+});
+
+module.exports = notepadRouter;

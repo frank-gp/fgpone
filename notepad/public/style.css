@@ -8,7 +8,7 @@ body {
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
 }
 
-.post {
+.display_data {
   border: 1px solid #6664;
   margin: 1em auto;
   padding: 1em;
@@ -78,3 +78,75 @@ textarea::placeholder {
   color: #bbb; /* Placeholder text color */
   font-style: italic; /* Placeholder font style */
 }
+
+/* === Desktop... === */
+@media (min-width: 40rem) {
+}
+/* === Desktop... === */
+
+/* === Mobile... === */
+@media (max-width: 40rem) {
+  .mobile_none {
+    display: none;
+  }
+}
+/* === Mobile... === */
+
+span {
+  color: inherit;
+}
+
+/* <discplay_data> */
+.display_data .container * {
+  font-family: monospace;
+  /* font-size: 16px; */
+  margin: 0;
+  padding: 0;
+}
+
+.display_data .container {
+  display: flex;
+  margin-bottom: 1em;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.display_data .line-numbers {
+  counter-reset: line;
+  padding: 10px;
+  background-color: #f0f0f0;
+  background-color: #001;
+}
+
+.display_data .line-numbers span {
+  counter-increment: line;
+  display: block;
+}
+
+.display_data .line-numbers span:before {
+  content: counter(line);
+  display: inline-block;
+  width: 20px;
+  text-align: right;
+  margin-right: 5px;
+  color: #999;
+}
+
+.display_data .code-editor {
+  flex-grow: 1;
+  position: relative;
+}
+
+.display_data .code-editor code {
+  /* width: 100%; */
+  /* padding: 10px; */
+  font-family: monospace;
+  /* border: 1px solid #ccc; */
+  /* background-color: #f9f9f9; */
+  /* white-space: pre-wrap; */
+}
+
+.display_data pre code.hljs {
+  padding: 10px !important;
+}
+/* </discplay_data> */

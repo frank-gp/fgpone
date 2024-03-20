@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload JSON Data</title>
+</head>
+<body>
+    <h1>Upload JSON Data</h1>
+    <form action="./upload" method="POST">
+        <label for="jsonData">JSON Data:</label><br>
+        <textarea id="jsonData" name="jsonData" rows="10" cols="50"></textarea><br>
+        <input type="submit" value="Upload">
+    </form>
+
+    <h2>Fetch Data from /api</h2>
+    <button onclick="fetchData()">Fetch Data</button>
+    <textarea id="apiData" rows="10" cols="50"></textarea>
+
+    <script>
+        function fetchData() {
+            fetch('/api')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('apiData').value = JSON.stringify(data, null, 2);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+    </script>
+</body>
+</html>

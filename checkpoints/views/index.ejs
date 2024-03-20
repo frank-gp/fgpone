@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkpoint Training | JavaScript</title>
+    <meta property="og:image" content="https://i.postimg.cc/zGv076Jv/fb-cover.webp" />
+    <script src="https://frankgp.com/component/stat.js" type="module"></script>
+    <link rel="stylesheet" href="https://frankgp.com/lib/btn.css" />
+    <script src="https://frankgp.com/component/layout.js" type="module"></script>
+    <style>
+      label {
+        /* margin: 0.2em; */
+        display: block;
+      }
+      h3 {
+        margin: 1em auto;
+        max-width: 55ch;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Checkpoint Training | JavaScript</h1>
+      <br>
+      <br>
+      <br>
+      <form id="formularioPreguntas">
+        <% preguntas.forEach(pregunta => { %>
+        <hr />
+
+        <div class="pregunta_container">
+          <h3><%= pregunta.pregunta %></h3>
+          <% pregunta.opciones.forEach(opcion => { %>
+          <label>
+            <input type="radio" name="pregunta_<%= pregunta.id %>" value="<%= opcion %>" />
+            <%= opcion %>
+          </label>
+          <br />
+          <% }) %>
+        </div>
+        <% }) %>
+        <br />
+        <button type="button" id="btnEnviarRespuestas">Enviar respuestas</button>
+        <button onclick="location.reload()">Siguiente</button>
+
+        <br />
+      </form>
+      <br />
+
+      <h2>Puntaje: <span class="data_response"></span></h2>
+      <script>
+        document.getElementById("btnEnviarRespuestas").addEventListener("click", function () {
+          const respuestas = {};
+          document.querySelectorAll('input[type="radio"]:checked').forEach(function (input) {
+            const preguntaId = input.getAttribute("name").split("_")[1];
+            const respuesta = input.value;
+            respuestas[preguntaId] = respuesta;
+          });
+          console.log(respuestas);
+
+          // fetch("./comprobar", {
+          fetch("checkpoints/comprobar", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(respuestas),
+            // body: JSON.stringify({1: '14', 4: '5', 9: '13'}),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              // Manejar la respuesta del servidor, por ejemplo, mostrar el puntaje
+              console.log(data);
+              document.querySelector(".data_response").innerHTML = data.puntaje;
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+      </script>
+    </main>
+  </body>
+</html>

@@ -19,8 +19,6 @@
         text-align: center;
       }
 
-     
-
       p {
         font-size: 18px;
         color: #fff;
@@ -32,26 +30,27 @@
   </head>
   <body>
     <main>
-        <p>Sorry, the page you are looking for could not be found.</p>
-        <p>Redirecting to home in <span id="countdown">30</span> seconds...</p>
-      </main>
-      <script>
-        let countdown = 5;
-        const countdownElement = document.getElementById('countdown');
-  
-        function updateCountdown() {
-          countdown--;
-          countdownElement.innerText = countdown;
-  
-          if (countdown <= 0) {
-            // Redirect to another page after 30 seconds
-            window.location.href = '/'; // Replace '/' with the desired URL
-          }
+      <p>Sorry, the page you are looking for could not be found.</p>
+      <p>Redirecting to home in <span id="countdown">30</span> seconds...</p>
+
+      <a class="btn" href="/">🏠 Redirect Now...</a>
+    </main>
+    <script>
+      let countdown = 30;
+      const countdownElement = document.getElementById("countdown");
+
+      function updateCountdown() {
+        countdown--;
+        countdownElement.innerText = countdown;
+
+        if (countdown <= 0) {
+          // Redirect to another page after 30 seconds
+          window.location.href = "/"; // Replace '/' with the desired URL
         }
-  
-        // Update countdown every second
-        setInterval(updateCountdown, 1000);
-      </script>
-  
+      }
+
+      // Update countdown every second
+      setInterval(updateCountdown, 1000);
+    </script>
   </body>
 </html>

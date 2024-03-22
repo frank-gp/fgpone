@@ -17,9 +17,11 @@
       th,
       td {
         padding: 10px;
-        border: 1px solid #ddd;
+        border: 1px solid #ddd4 !important;
         text-align: left;
-        cursor: pointer;
+        /* cursor: pointer; */
+        white-space: nowrap;
+        padding: 0.3em 1em;
       }
 
       th {
@@ -33,6 +35,19 @@
       }
       h1 {
         text-align: center;
+      }
+      tr > td:nth-child(2) {
+        cursor: pointer;
+        color: cornflowerblue;
+        text-decoration: underline;
+        /* border-bottom: 1px solid peru; */
+      }
+      tr > td:nth-child(3) {
+        /* background-color: peru; */
+        max-width: 45ch; /* Set the desired width */
+        overflow: hidden; /* Hide overflow content */
+        white-space: nowrap; /* Prevent text from wrapping */
+        /* cursor: initial; */
       }
     </style>
   </head>
@@ -86,9 +101,23 @@
             const row = document.createElement("tr");
             row.innerHTML = `
           <td>${visits}</td>
-          <td><a href="/${shortUrl}" target="_blank">${shortUrl}</a></td>
+          <td><a class="shortUrl_td" href="/${shortUrl}" target="_blank">${shortUrl}</a></td>
           <td>${longUrl}</td>
         `;
+
+            // ========== insert_before_hostname... ==========
+            const cssHostname = /* css */ `
+  .shortUrl_td::before {
+    content: "${window.location.hostname}/";
+
+  }
+
+`;
+            const styleElement = document.createElement("style");
+            styleElement.innerHTML = cssHostname;
+            document.head.appendChild(styleElement);
+
+            // ========== insert_before_hostname. ==========
 
             tableBody.appendChild(row);
           });

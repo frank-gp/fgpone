@@ -2,7 +2,19 @@
 <% if (jsonData && jsonData.length > 0){ %> <% const sortedData = JSON.parse(jsonData).sort((a, b) => b.id - a.id); %> <% sortedData.forEach((item) => { %>
 <section class="display_data">
   <div class="head">
-    <p><span class="mobile_none itemID">ID: <%= item.id %> | </span><span>Name: <%= item.name %></span></p>
+    <!-- ========== convert_id_to_Date... ========== -->
+    <% 
+    const date = new Date(item.id);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    const formattedDate = `${year}/${month}/${day} ${hour}:${minute}`;
+    %>
+    <!-- ========== convert_id_to_Date. ========== -->
+
+    <p><span class="mobile_none itemID"><%= formattedDate %> | </span><span>Name: <%= item.name %></span></p>
     <button class="copy-btn">Copy<span class="mobile_none"> code </span></button>
     <%- // include("deleteButton.ejs", { data: item.id }) %>
   </div>

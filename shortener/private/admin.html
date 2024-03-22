@@ -9,6 +9,27 @@
       .buttons {
         display: flex;
       }
+      th,
+      td {
+        /* padding: 10px; */
+        border: 1px solid #ddd4 !important;
+        text-align: left;
+        cursor: pointer;
+        white-space: nowrap;
+        /* padding: 0.3em 1em; */
+      }
+      tr > td:nth-child(2) {
+        cursor: pointer;
+        color: cornflowerblue;
+        text-decoration: underline;
+        /* border-bottom: 1px solid peru; */
+      }
+      tr > td:nth-child(3) {
+        /* background-color: peru; */
+        max-width: 45ch; /* Set the desired width */
+        overflow: hidden; /* Hide overflow content */
+        white-space: nowrap; /* Prevent text from wrapping */
+      }
     </style>
   </head>
   <body>
@@ -87,9 +108,9 @@
               const urlData = data[shortUrl];
               const row = urlTable.insertRow(-1);
               row.insertCell(0).textContent = urlData.visits || 0;
-              row.insertCell(1).innerHTML = `<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+              row.insertCell(1).innerHTML = `<a class="shortUrl_td"  href="${shortUrl}" target="_blank">${shortUrl}</a>`;
               row.insertCell(2).textContent = urlData.longUrl;
-              row.insertCell(3).innerHTML = `
+              row.insertCell(3).innerHTML = /* html */ `
     <div class="buttons">
       <button onclick="updateUrl('${shortUrl}', '${urlData.longUrl}')">✏️</button>
       <button onclick="deleteUrl('${shortUrl}')">❌</button>
@@ -103,6 +124,19 @@
             console.error("Error fetching data:", error);
           }
         }
+        // ========== insert_before_hostname... ==========
+        const cssHostname = /* css */ `
+  .shortUrl_td::before {
+    content: "${window.location.hostname}/";
+
+  }
+
+`;
+        const styleElement = document.createElement("style");
+        styleElement.innerHTML = cssHostname;
+        document.head.appendChild(styleElement);
+
+        // ========== insert_before_hostname. ==========
 
         // Function to handle form submission for adding a new URL
         addForm.addEventListener("submit", async (event) => {
@@ -258,7 +292,7 @@
               const urlData = sortedData[shortUrl];
               const row = urlTable.insertRow(-1);
               row.insertCell(0).textContent = urlData.visits || 0;
-              row.insertCell(1).innerHTML = `<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+              row.insertCell(1).innerHTML = `<a class="shortUrl_td" href="${shortUrl}" target="_blank">${shortUrl}</a>`;
               row.insertCell(2).textContent = urlData.longUrl;
               row.insertCell(3).innerHTML = `
     <div class="buttons">

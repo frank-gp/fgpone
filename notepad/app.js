@@ -69,15 +69,15 @@ notepadRouter.get("/download", (req, res) => {
 });
 
 notepadRouter.post("/", (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   // res.json({ message: "Data received successfully", body: req.body });
 
   const newData = {
     id: Date.now(), // Use current timestamp as ID
-    name: req.body.name,
+    name: req.body.name.trim(), // Remove leading and trailing whitespace
     textarea: req.body.content, // Corrected property name
   };
-  console.log(newData);
+  // console.log(newData);
 
   fs.readFile(dataFilePath, "utf8", (err, data) => {
     if (err) {
@@ -174,6 +174,55 @@ notepadRouter.post("/upload", (req, res) => {
     console.error(error);
     res.status(400).send("Invalid JSON data");
   }
+});
+
+notepadRouter.get("/:id", (req, res) => {
+  const noteId = req.params.id;
+  fs.readFile(dataFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error reading data file");
+      return;
+    }
+    try {
+      const notes = JSON.parse(data);
+      const note = notes.find((note) => note.id === parseInt(noteId));
+      if (!note) {
+        res.status(404).send("Note not found");
+        return;
+      }
+      // console.log(note);
+      res.render("note", { jsonData: [note] });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Error parsing data file");
+    }
+  });
+});
+
+notepadRouter.get("/name/:name", (req, res) => {
+  const noteName = req.params.name;
+  // console.log(noteName);
+  fs.readFile(dataFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      res.render("error", { message: "Error reading notes file." });
+      return;
+    }
+
+    const notes = JSON.parse(data);
+    const matchingNotes = notes.filter((note) => note.name === noteName);
+
+    if (matchingNotes.length === 0) {
+      res.render("error", { message: "No notes found with the specified name." });
+      return;
+    }
+
+    // res.render("notes", { notes: matchingNotes });
+    res.render("name.ejs", { jsonData: matchingNotes });
+
+    // res.json(matchingNotes);
+  });
 });
 
 module.exports = notepadRouter;

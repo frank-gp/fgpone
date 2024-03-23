@@ -1,4 +1,4 @@
-<h2>Display Data</h2>
+<!-- <h2>Display Data</h2> -->
 <% if (jsonData && jsonData.length > 0){ %> <% const sortedData = JSON.parse(jsonData).sort((a, b) => b.id - a.id); %> <% sortedData.forEach((item) => { %>
 <section class="display_data">
   <div class="head">
@@ -15,8 +15,15 @@
         %>
         <!-- ========== convert_id_to_Date. ========== -->
     
-    <p><span class="mobile_none itemID">ID: <%= formattedDate %> | </span><span>Name: <%= item.name %></span></p>
-    <button class="copy-btn">Copy<span class="mobile_none"> code </span></button>
+        <p>
+          <span class="mobile_none itemID" id="<%= item.id %>">
+          <a href="<%= item.id %>"><%= formattedDate %></a> | </span>
+          <span>
+            <a href="./name/<%= item.name %>"><%= item.name %></a>
+          </span>  
+        </p>
+        
+        <button class="copy-btn">Copy<span class="mobile_none"> code </span></button>
     <%- include("deleteButton.ejs", { data: item.id }) %>
   </div>
 

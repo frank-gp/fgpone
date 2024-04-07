@@ -3,6 +3,7 @@ node_modules/
 *data*.json
 .env
 *dev.*
+*temp*
 *backup*
 tmp/
 uploads/

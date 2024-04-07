@@ -37,6 +37,9 @@ mainApp.use("/feed", router);
 const notepad = require("./notepad/app.js");
 mainApp.use("/notepad", notepad);
 
+const note = require("./note/app.js");
+mainApp.use("/note", note);
+
 const api = require("./api/app.js");
 mainApp.use("/api", api);
 

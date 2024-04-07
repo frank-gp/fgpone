@@ -1,0 +1,96 @@
+<!-- <h2>Display Note</h2> -->
+<div id="notesContainer"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    fetch("/note")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        renderNotes(data);
+      })
+      .catch((error) => {
+        console.error("There was a problem with your fetch operation:", error);
+      });
+  });
+
+  function renderNotes(notes) {
+    const notesContainer = document.getElementById("notesContainer");
+    notes.sort((a, b) => b.id - a.id); // Sort notes array in descending order based on id
+    notes.forEach((item) => {
+      const noteHTML = `
+        <section class="display_data">
+          <div class="head">
+            <p>
+              <span class="mobile_none itemID" id="${item.id}">
+                <a href="${item.id}">${item.id}</a> |
+              </span>
+              <span>
+                <a href="./name/${item.name}">${item.name}</a>
+              </span>  
+            </p>
+            <button class="copy-btn">Copy code</button>
+          </div>
+          <div class="container">
+            <aside class="line-numbers">
+              <span></span>
+            </aside>
+            <aside class="code-editor">
+              <pre><code class="code">${item.textarea}</code></pre>
+            </aside>
+          </div>
+        </section>
+      `;
+      notesContainer.insertAdjacentHTML("beforeend", noteHTML);
+    });
+
+    updateLineNumbers();
+
+    // Event listener for copy buttons
+    const copyButtons = document.querySelectorAll(".copy-btn");
+    copyButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const codeElement = this.parentElement.nextElementSibling.querySelector("code");
+
+        if (codeElement) {
+          const text = codeElement.innerText;
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              this.textContent = "✅ Copied!";
+              this.classList.add("copy-btn-animation");
+              setTimeout(() => {
+                this.textContent = "Copy code";
+                this.classList.remove("copy-btn-animation");
+              }, 3000);
+            })
+            .catch((err) => {
+              console.error("Failed to copy:", err);
+            });
+        }
+      });
+    });
+  }
+
+  // Function to update line numbers
+  function updateLineNumbers() {
+    const codeElements = document.querySelectorAll(".code");
+    codeElements.forEach((codeElement) => {
+      const lines = codeElement.textContent.split("\n").length;
+      const lineNumbersWrapper = codeElement.closest(".container").querySelector(".line-numbers");
+      lineNumbersWrapper.innerHTML = "";
+      for (let i = 2; i <= lines; i++) {
+        const span = document.createElement("span");
+        lineNumbersWrapper.appendChild(span);
+      }
+    });
+  }
+</script>
+
+<!-- ========== highlight Component... ========== -->
+<script src="https://frankgp.com/lib/highlight.js" type="module"></script>
+<!-- ========== highlight Component. ========== -->

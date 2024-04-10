@@ -102,4 +102,42 @@ notepadRouter.delete("/:id", (req, res) => {
   });
 });
 
+const dato1 = [
+  {_id: 1, name: "frank 1"},
+  {_id: 2, name: "frank 2"},
+  {_id: 3, name: "frank 3"},
+  {_id: 4, name: "frank 4"},
+]
+
+ function getPaginatedItems(page = 1, perPage = 10) {
+  try {
+    const items =  dato1
+      // .skip((page - 1) * perPage)
+      // .limit(perPage);
+
+    // const totalItems =  Item.countDocuments();
+    const totalItems =  dato1.length();
+
+    return {
+      items,
+      currentPage: page,
+      totalPages: Math.ceil(totalItems / perPage),
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+notepadRouter.get("/pages", async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const perPage = parseInt(req.query.perPage) || 10;
+
+  try {
+    const result = await getPaginatedItems(page, perPage);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = notepadRouter;

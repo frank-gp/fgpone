@@ -12,7 +12,7 @@ const router = express.Router();
 router.use(express.static(__dirname));
 
 const apiUrl = 'https://graph.instagram.com/me/media';
-const fields = 'media_type,media_url,caption,permalink';
+const fields = 'media_url,permalink';
 const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
 
 if (!accessToken) {

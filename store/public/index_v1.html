@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos</title>
+    <style>
+        /* Estilos básicos, puedes personalizarlos según tu preferencia */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .product {
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Productos</h1>
+        <button onclick="mostrarTodo()">Mostrar Todo</button>
+        <button onclick="filtrarPorCategoria('Tops')">Tops</button>
+        <button onclick="filtrarPorCategoria('Pantalones')">Pantalones</button>
+        <button onclick="filtrarPorCategoria('Vestidos')">Vestidos</button>
+        <div id="productos"></div>
+    </div>
+
+    <script>
+        // Función para mostrar todos los productos
+        function mostrarTodo() {
+            fetch('http://127.0.0.1:3000/productos')
+            .then(response => response.json())
+            .then(data => {
+                const categorias = {};
+                // Agrupar productos por categoría
+                data.forEach(producto => {
+                    if (!categorias[producto.categoria]) {
+                        categorias[producto.categoria] = [];
+                    }
+                    categorias[producto.categoria].push(producto);
+                });
+                // Mostrar productos por categoría
+                mostrarProductosPorCategoria(categorias);
+            });
+        }
+
+        // Función para filtrar productos por categoría
+        function filtrarPorCategoria(categoria) {
+            fetch('http://127.0.0.1:3000/productos')
+            .then(response => response.json())
+            .then(data => {
+                const productosFiltrados = data.filter(producto => producto.categoria === categoria);
+                mostrarProductos(productosFiltrados);
+            });
+        }
+
+        // Función para mostrar productos por categoría en secciones
+        function mostrarProductosPorCategoria(categorias) {
+            const contenedorProductos = document.getElementById('productos');
+            contenedorProductos.innerHTML = '';
+
+            for (const categoria in categorias) {
+                const productos = categorias[categoria];
+                const categoriaHTML = `<section><h2>${categoria}</h2></section>`;
+                contenedorProductos.innerHTML += categoriaHTML;
+
+                const section = contenedorProductos.lastElementChild;
+                productos.forEach(producto => {
+                    const productoHTML = `
+                        <div class="product">
+                            <h3>${producto.nombre}</h3>
+                            <p>Precio: ${producto.precio}</p>
+                            <img src="${producto.imagenes[0]}" alt="${producto.nombre}">
+                        </div>
+                    `;
+                    section.innerHTML += productoHTML;
+                });
+            }
+        }
+
+        // Función para mostrar los productos en el front-end
+        function mostrarProductos(productos) {
+            const contenedorProductos = document.getElementById('productos');
+            contenedorProductos.innerHTML = '';
+
+            productos.forEach(producto => {
+                const productoHTML = `
+                    <div class="product">
+                        <h2>${producto.nombre}</h2>
+                        <p>Categoría: ${producto.categoria}</p>
+                        <p>Precio: ${producto.precio}</p>
+                        <img src="${producto.imagenes[0]}" alt="${producto.nombre}">
+                    </div>
+                `;
+                contenedorProductos.innerHTML += productoHTML;
+            });
+        }
+
+        // Mostrar todos los productos al cargar la página
+        mostrarTodo();
+    </script>
+</body>
+</html>

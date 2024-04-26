@@ -1,9 +1,12 @@
-node_modules/
-*node_modules*
-*data*.json
 .env
-*dev.*
-*temp*
+.vscode
+*.jpeg
+*.jpg
+*.png
 *backup*
+*data*.json
+*dev.*
+*node_modules*
+*temp*
 tmp/
 uploads/

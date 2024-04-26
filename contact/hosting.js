@@ -7,22 +7,23 @@ const app = express();
 
 // Parse JSON bodies
 app.use(bodyParser.json());
-app.use(express.static(__dirname));
-
-// Set up Nodemailer transporter
-const transporter = nodemailer.createTransport({
-  host: "server323.web-hosting.com",
-  port: 465,
-  secure: true, // true for 465, false for other ports
-  auth: {
-    user: "contact@fgp.one",
-    pass: process.env.PASSWORD1,
-  },
-});
+app.use(express.static(__dirname))
 
 // Serve the HTML file
 app.get("/submit", (req, res) => {
   res.send("contact submit");
+});
+
+// Create a nodemailer transporter
+// Set up Nodemailer transporter
+const transporter = nodemailer.createTransport({
+  host: 'server251.web-hosting.com',
+  port: 465,
+  secure: true, // true for 465, false for other ports
+  auth: {
+    user: 'contact@frankgp.com',
+    pass: process.env.CONTACT_FRANKGP_COM,
+  },
 });
 
 // Handle form submissions
@@ -35,7 +36,7 @@ app.post("/submit", async (req, res) => {
 
   // Set up email data
   const mailOptions = {
-    from: "contact@fgp.one",
+    from: "contact@frankgp.com",
     to: "fgp555@gmail.com",
     cc: email,
     subject: "Thank you for writing to us",
@@ -55,6 +56,7 @@ app.post("/submit", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
+
 
 // Start the server
 // app.listen(port, () => {

@@ -5,8 +5,8 @@ const path = require("path");
 const app = express();
 
 // ========== login... ==========
-const username = process.env.USER;
-const password = process.env.PASSWORD;
+const username = process.env.USER1;
+const password = process.env.PASSWORD1;
 app.use(bodyParser.urlencoded({ extended: true }));
 const users = [{ username, password }];
 // console.log(users)

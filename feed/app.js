@@ -60,4 +60,4 @@ const interval = 5 * 24 * 60 * 60 * 1000; // 5 days in milliseconds
 setInterval(fetchDataAndSave, interval);
 fetchDataAndSave();
 
-module.exports = { router };
+module.exports =  router;

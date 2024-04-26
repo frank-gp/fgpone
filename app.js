@@ -13,41 +13,29 @@ require("dotenv").config();
 
 mainApp.use(cors());
 
-const appDev = require("./appDev/app.js");
-mainApp.use("/appDev", appDev);
+mainApp.use("/appDev", require("./appDev/app.js"));
 
-const login = require("./login/app.js");
-mainApp.use("/login", login);
+mainApp.use("/login", require("./login/app.js"));
 
-const stat = require("./stat/app.js");
-mainApp.use("/stat", stat);
+mainApp.use("/stat", require("./stat/app.js"));
 
-const contact = require("./contact/app.js");
-mainApp.use("/contact", contact);
+mainApp.use("/contact", require("./contact/app.js"));
 
-const img = require("./img/app.js");
-mainApp.use("/img", img);
+mainApp.use("/img", require("./img/app.js"));
 
-const todo = require("./todo/app.js");
-mainApp.use("/todo", todo);
+mainApp.use("/todo", require("./todo/app.js"));
 
-const { router } = require("./feed/app.js");
-mainApp.use("/feed", router);
+// mainApp.use("/feed", require("./feed/app.js"));
 
-const notepad = require("./notepad/app.js");
-mainApp.use("/notepad", notepad);
+mainApp.use("/notepad", require("./notepad/app.js"));
 
-const note = require("./note/app.js");
-mainApp.use("/note", note);
+mainApp.use("/note", require("./note/app.js"));
 
-const api = require("./api/app.js");
-mainApp.use("/api", api);
+mainApp.use("/api", require("./api/app.js"));
 
-const checkpoints = require("./checkpoints/app.js");
-mainApp.use("/checkpoints", checkpoints);
+mainApp.use("/store", require("./store/app.js"));
 
-const shortener = require("./shortener/app.js");
-mainApp.use("/", shortener);
+mainApp.use("/", require("./shortener/app.js"));
 
 const PORT = process.env.PORT || 3000;
 mainApp.listen(PORT, () => {

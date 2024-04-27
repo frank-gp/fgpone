@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const mainApp = express();
 const cors = require("cors");
 require("dotenv").config();
@@ -25,7 +26,7 @@ mainApp.use("/img", require("./img/app.js"));
 
 mainApp.use("/todo", require("./todo/app.js"));
 
-// mainApp.use("/feed", require("./feed/app.js"));
+mainApp.use("/feed", require("./feed/app.js"));
 
 mainApp.use("/notepad", require("./notepad/app.js"));
 
@@ -37,7 +38,23 @@ mainApp.use("/store", require("./store/app.js"));
 
 mainApp.use("/", require("./shortener/app.js"));
 
+// Conexión a la base de datos MongoDB
 const PORT = process.env.PORT || 3000;
-mainApp.listen(PORT, () => {
-  console.log(`Main App listening on port http://localhost:${PORT}`);
+const MONGO_URI = process.env.MONGO_URI;
+const dbName = "fgpone";
+
+const connectDB = async () => {
+  try {
+    console.log(MONGO_URI);
+    await mongoose.connect(MONGO_URI, { dbName });
+    console.log("Conexión a la base de datos de mongodb/storeDB establecida");
+  } catch (error) {
+    console.error("Error al conectar a la base de datos:", error);
+  }
+};
+connectDB().then(() => {
+  console.log("Conexión establecida");
+  mainApp.listen(PORT, () => {
+    console.log(`Main App listening on port http://localhost:${PORT}`);
+  });
 });

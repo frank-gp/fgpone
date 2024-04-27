@@ -6,27 +6,14 @@ const path = require("path");
 
 const app = express();
 
-// Conexión a la base de datos MongoDB
-const MONGO_URI = process.env.MONGO_URI;
-const dbName = "storeDB";
-const connectDB = async () => {
-  try {
-    console.log(MONGO_URI);
-    await mongoose.connect(MONGO_URI, { dbName });
-    console.log("Conexión a la base de datos de mongodb/storeDB establecida");
-  } catch (error) {
-    console.error("Error al conectar a la base de datos:", error);
-  }
-};
-
-const productoSchema = new mongoose.Schema({
+const storeSchema = new mongoose.Schema({
   categoria: { type: String, required: true },
   nombre: { type: String, required: true },
   precio: { type: Number, required: true },
   imagenes: [{ type: String }],
 });
 
-const Producto = mongoose.model("Producto", productoSchema);
+const StoreModel = mongoose.model("Store", storeSchema);
 // const Producto = mongoose.model("Producto", new mongoose.Schema({}));
 
 // const uploadDir = "public/uploads/";
@@ -60,7 +47,7 @@ app.post("/api/productos/crear", upload.array("imagenes"), async (req, res) => {
     const { categoria, nombre, precio } = req.body;
 
     // Crea una nueva categoría en la base de datos
-    const nuevaCategoria = new Producto({
+    const nuevaCategoria = new StoreModel({
       categoria,
       nombre,
       precio,
@@ -80,7 +67,7 @@ app.post("/api/productos/crear", upload.array("imagenes"), async (req, res) => {
 // Ruta para obtener todas las categorías
 app.get("/api/productos", async (req, res) => {
   try {
-    const categorias = await Producto.find();
+    const categorias = await StoreModel.find();
     res.status(200).json(categorias);
   } catch (error) {
     console.error(error);
@@ -92,7 +79,7 @@ app.get("/api/productos", async (req, res) => {
 app.delete("/api/productos/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const categoriaEliminada = await Producto.findByIdAndDelete(id);
+    const categoriaEliminada = await StoreModel.findByIdAndDelete(id);
     if (!categoriaEliminada) {
       return res.status(404).json({ error: "Categoría no encontrada" });
     }
@@ -108,7 +95,7 @@ app.put("/api/productos/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const { categoria, nombre, precio } = req.body;
-    const categoriaActualizada = await Producto.findByIdAndUpdate(id, { categoria, nombre, precio }, { new: true });
+    const categoriaActualizada = await StoreModel.findByIdAndUpdate(id, { categoria, nombre, precio }, { new: true });
     if (!categoriaActualizada) {
       return res.status(404).json({ error: "Categoría no encontrada" });
     }
@@ -126,7 +113,7 @@ app.get("/api/productos/:categoria", async (req, res) => {
     const categoria = req.params.categoria;
 
     // Consulta la base de datos para encontrar las categorías según la opción proporcionada
-    const categorias = await Producto.find({ categoria: categoria });
+    const categorias = await StoreModel.find({ categoria: categoria });
 
     // Envía las categorías encontradas como respuesta
     res.status(200).json(categorias);
@@ -190,5 +177,4 @@ app.post("/admin", (req, res) => {
 //   });
 // });
 
-connectDB();
 module.exports = app;

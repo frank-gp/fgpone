@@ -8,7 +8,7 @@ const dataFilePath = path.join(__dirname, "dataShortener.json");
 
 shortenerApp.use(express.urlencoded({ extended: true }));
 shortenerApp.use(express.json());
-// shortenerApp.use(express.static(__dirname));
+shortenerApp.use(express.static(path.join(__dirname, "public")));
 
 // Helper functions
 async function loadData() {
@@ -65,11 +65,7 @@ shortenerApp.post("/upload", (req, res) => {
 // ========== login. ==========
 
 // GET routes
-shortenerApp.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
-
-// shortenerApp.get("/upload", (req, res) => res.sendFile(path.join(__dirname, "upload.html")));
-
-// shortenerApp.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "admin.html")));
+// shortenerApp.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
 
 shortenerApp.get("/get-data", async (req, res) => res.json(await loadData()));
 
@@ -86,7 +82,7 @@ shortenerApp.get("/:shortUrl", async (req, res) => {
     res.redirect(urlData.longUrl);
   } else {
     // Assuming your 404.html file is in the root directory of your project
-    const filePath = path.join(__dirname, "404.html");
+    const filePath = path.join(__dirname, "public/404.html");
     res.status(404).sendFile(filePath);
   }
 });
@@ -170,6 +166,6 @@ shortenerApp.delete("/delete/:shortUrl", async (req, res) => {
 });
 
 // 404 and listen
-shortenerApp.use((req, res) => res.status(404).sendFile(path.join(__dirname, "404.html")));
+// shortenerApp.use((req, res) => res.status(404).sendFile(path.join(__dirname, "public", "1404.html")));
 
 module.exports = shortenerApp;

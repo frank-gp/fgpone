@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /private/
+Disallow: /tmp/
+
+User-agent: Googlebot
+Disallow: /no-google/
+

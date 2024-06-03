@@ -23,7 +23,6 @@
 
       th {
         background-color: #f2f2f2;
-        cursor: pointer;
       }
     </style>
   </head>
@@ -41,8 +40,8 @@
     <table id="url-table">
       <thead>
         <tr>
-          <th data-type="number">Visits</th>
-          <th data-type="string">Current URL</th>
+          <th>Visits</th>
+          <th>Current URL</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -53,8 +52,8 @@
     <table id="city-table">
       <thead>
         <tr>
-          <th data-type="number">Visits</th>
-          <th data-type="string">City</th>
+          <th>Visits</th>
+          <th>City</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -65,8 +64,8 @@
     <table id="countryName-table">
       <thead>
         <tr>
-          <th data-type="number">Visits</th>
-          <th data-type="string">City</th>
+          <th>Visits</th>
+          <th>City</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -77,8 +76,8 @@
     <table id="referrer-url-table">
       <thead>
         <tr>
-          <th data-type="number">Visits</th>
-          <th data-type="string">Referrer URL</th>
+          <th>Visits</th>
+          <th>Referrer URL</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -113,7 +112,6 @@
 
         // Display counts in the table
         const tableBody = document.querySelector(`#${tableName} tbody`);
-        tableBody.innerHTML = ""; // Clear any existing rows
 
         for (const [value, count] of Object.entries(counts)) {
           const row = document.createElement("tr");
@@ -147,39 +145,8 @@
           displayVisitCounts(jsonData, "city-table", "city");
 
           displayVisitCounts(jsonData, "countryName-table", "countryName");
-
-          // Add sorting functionality to table headers
-          document.querySelectorAll("th").forEach((th) => {
-            th.addEventListener("click", function () {
-              sortTable(th);
-            });
-          });
         })
         .catch((error) => console.error("Error fetching data:", error));
-
-      function sortTable(header) {
-        const table = header.closest("table");
-        const tbody = table.querySelector("tbody");
-        const rowsArray = Array.from(tbody.querySelectorAll("tr"));
-        const index = Array.from(header.parentNode.children).indexOf(header);
-        const type = header.dataset.type;
-        const order = header.dataset.order === "asc" ? "desc" : "asc";
-        header.dataset.order = order;
-
-        rowsArray.sort((rowA, rowB) => {
-          const cellA = rowA.children[index].innerText;
-          const cellB = rowB.children[index].innerText;
-
-          if (type === "number") {
-            return order === "asc" ? cellA - cellB : cellB - cellA;
-          } else {
-            return order === "asc" ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
-          }
-        });
-
-        // Append sorted rows to the tbody
-        rowsArray.forEach((row) => tbody.appendChild(row));
-      }
     </script>
   </body>
 </html>

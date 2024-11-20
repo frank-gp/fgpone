@@ -46,8 +46,7 @@ shortenerApp.post("/admin", (req, res) => {
     const adminPath = path.join(__dirname, "private", "admin-dashboard.html");
     res.sendFile(adminPath);
   } else {
-    const logoutPath = path.join(__dirname, "private", "try-again.html");
-    res.sendFile(logoutPath);
+    res.send("Login failed");
   }
 });
 // ========== 2 ==========

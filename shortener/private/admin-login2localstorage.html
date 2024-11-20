@@ -22,7 +22,9 @@
       }
 
       main label {
-        cursor: pointer;
+        font-size: 14px;
+        margin-bottom: 5px;
+        display: block;
       }
 
       main input[type="text"],
@@ -76,12 +78,8 @@
       }
 
       .remember-me {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-top: 1.5em;
-        cursor: pointer;
-        gap: 0.5em;
+        font-size: 14px;
+        margin-bottom: 15px;
       }
     </style>
   </head>
@@ -90,60 +88,51 @@
       <h1>Login Page</h1>
       <form action="/admin" method="POST" onsubmit="handleSubmit(event)">
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required />
+        <input type="text" id="username" name="username" required onchange="saveToLocalStorage()" />
         <br />
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required />
+        <input type="password" id="password" name="password" required onchange="saveToLocalStorage()" />
         <br />
+        <div class="remember-me">
+          <input type="checkbox" id="rememberMe" name="rememberMe" />
+          <label for="rememberMe">Remember me</label>
+        </div>
         <button type="submit">Login</button>
       </form>
-      <div class="remember-me">
-        <input type="checkbox" id="rememberMe" name="rememberMe" />
-        <label for="rememberMe">Remember me</label>
-      </div>
     </main>
-    <script>
-      const rememberMeCheckbox = document.getElementById("rememberMe");
 
-      rememberMeCheckbox.onclick = function () {
-        console.log("Checkbox checked:", rememberMeCheckbox.checked);
-        if (rememberMeCheckbox.checked) {
-          saveToLocalStorage();
+    <script>
+      // Function to save the username, password, and remember me state to localStorage
+      function saveToLocalStorage() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const rememberMe = document.getElementById("rememberMe").checked;
+
+        if (rememberMe) {
+          localStorage.setItem("username", username);
+          localStorage.setItem("password", password);
         } else {
           localStorage.removeItem("username");
           localStorage.removeItem("password");
         }
-      };
-
-      // Function to save the username and password to localStorage
-      function saveToLocalStorage() {
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-        console.log("Saving to localStorage:", username, password);
-
-        localStorage.setItem("username", username);
-        localStorage.setItem("password", password);
       }
 
       // Check if username and password are stored in localStorage
       const storedUsername = localStorage.getItem("username");
       const storedPassword = localStorage.getItem("password");
 
-      console.log("Stored username:", storedUsername);
-      console.log("Stored password:", storedPassword);
-
       if (storedUsername && storedPassword) {
-        console.log("Stored username:", storedUsername);
-        console.log("Stored password:", storedPassword);
-
         const usernameInput = document.getElementById("username");
         const passwordInput = document.getElementById("password");
 
         usernameInput.value = storedUsername;
         passwordInput.value = storedPassword;
 
+        const rememberMeCheckbox = document.getElementById("rememberMe");
+        rememberMeCheckbox.checked = true;
+
         const form = document.querySelector("form");
-        form.submit();
+        // form.submit();
       }
     </script>
   </body>

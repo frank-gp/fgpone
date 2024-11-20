@@ -30,10 +30,32 @@
         overflow: hidden; /* Hide overflow content */
         white-space: nowrap; /* Prevent text from wrapping */
       }
+      .logout-container {
+        display: flex;
+        justify-content: flex-end;
+      }
+      .btn-logout {
+        background-color: red;
+        /* margin-right: auto; */
+      }
     </style>
   </head>
   <body>
     <main>
+      <div class="logout-container">
+        <script>
+          // Function to remove username and password from localStorage
+          function removeLocalStorage() {
+            localStorage.removeItem("username");
+            localStorage.removeItem("password");
+            // alert("LocalStorage cleared!");
+            location.href = "/admin";
+            // location.reload()
+          }
+        </script>
+        <button class="btn-logout" onclick="removeLocalStorage()">Logout</button>
+      </div>
+
       <h1>URL Shortener | <span id="rows"></span></h1>
 
       <!-- Form for resetting visits -->

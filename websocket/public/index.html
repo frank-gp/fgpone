@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://frankgp.com/component/stat.js" type="module"></script>
+    <title>Chat estilo WhatsApp</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1 {
+        text-align: center;
+        margin: 0;
+        padding: 10px;
+        background-color: #075e54;
+        color: white;
+        font-size: 24px;
+      }
+
+      #chat {
+        display: flex;
+        flex-direction: column-reverse; /* Muestra los mensajes más recientes al fondo */
+        width: 100%;
+        height: 70vh;
+        border: 1px solid #ccc;
+        overflow-y: auto;
+        background-color: #e5ddd5;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+
+      .message {
+        max-width: 60%;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 10px;
+        display: inline-block;
+        font-size: 14px;
+      }
+
+      .sent {
+        background-color: #dcf8c6;
+        align-self: flex-end; /* Alinea el mensaje a la derecha */
+        text-align: right;
+        margin-left: auto;
+      }
+
+      .received {
+        background-color: #ffffff;
+        align-self: flex-start; /* Alinea el mensaje a la izquierda */
+        text-align: left;
+        margin-right: auto;
+      }
+
+      #messageInput {
+        width: calc(100% - 110px);
+        padding: 10px;
+        border: none;
+        border-top: 1px solid #ccc;
+      }
+
+      #sendButton {
+        width: 100px;
+        padding: 10px;
+        border: none;
+        background-color: #075e54;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      #sendButton:hover {
+        background-color: #128c7e;
+      }
+
+      #messageContainer {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 110px);
+      }
+
+      #inputContainer {
+        display: flex;
+        border-top: 1px solid #ccc;
+        background-color: #ffffff;
+        align-items: center;
+      }
+
+      .user-name {
+        font-weight: bold;
+        font-size: 14px;
+        color: #075e54;
+        margin: 5px 0;
+      }
+
+      #nameInputContainer {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      #nameInputContainer input {
+        padding: 10px;
+        font-size: 16px;
+      }
+
+      #nameInputContainer button {
+        padding: 10px;
+        font-size: 16px;
+        background-color: #075e54;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+
+      #nameInputContainer button:hover {
+        background-color: #128c7e;
+      }
+
+      #chatContainer {
+        display: none;
+      }
+
+      #loginContainer {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Chat Estilo WhatsApp</h1>
+    <div id="loginContainer">
+      <div id="nameInputContainer">
+        <input type="text" id="nameInput" placeholder="Introduce tu nombre" />
+        <button id="startChatButton">Iniciar Chat</button>
+      </div>
+    </div>
+
+    <div id="chatContainer">
+      <p id="userNameDisplay"></p>
+      <div id="messageContainer">
+        <div id="chat"></div>
+        <div id="inputContainer">
+          <input id="messageInput" type="text" placeholder="Escribe tu mensaje aquí" />
+          <button id="sendButton">Enviar</button>
+        </div>
+        <button id="logoutButton">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <script>
+      let userName = localStorage.getItem("chatUserName");
+
+      let socket;
+      if (window.location.hostname === "localhost") {
+        socket = new WebSocket("ws://localhost:3000");
+      } else {
+        socket = new WebSocket(`wss://${window.location.host}`);
+      }
+
+      const chatDiv = document.getElementById("chat");
+      const messageInput = document.getElementById("messageInput");
+      const sendButton = document.getElementById("sendButton");
+      const startChatButton = document.getElementById("startChatButton");
+      const logoutButton = document.getElementById("logoutButton");
+      const nameInput = document.getElementById("nameInput");
+      const userNameDisplay = document.getElementById("userNameDisplay");
+
+      const loginContainer = document.getElementById("loginContainer");
+      const chatContainer = document.getElementById("chatContainer");
+
+      // Mostrar el formulario de entrada para el nombre
+      if (!userName) {
+        loginContainer.style.display = "block";
+        chatContainer.style.display = "none";
+      } else {
+        startChat(userName);
+      }
+
+      // Evento para iniciar el chat
+      startChatButton.addEventListener("click", () => {
+        userName = nameInput.value.trim();
+        if (userName) {
+          localStorage.setItem("chatUserName", userName);
+          startChat(userName);
+        }
+      });
+
+      // Función para iniciar el chat
+      function startChat(name) {
+        loginContainer.style.display = "none";
+        chatContainer.style.display = "block";
+        userNameDisplay.textContent = `Bienvenido, ${name}`;
+
+        // Escuchar mensajes del servidor
+        socket.onmessage = async (event) => {
+          const message = await event.data.text(); // Convertir Blob a texto
+          const [sender, ...content] = message.split(": "); // Dividir el mensaje en emisor y contenido
+          const text = content.join(": "); // Reconstruir contenido del mensaje
+
+          // Mostrar el mensaje recibido
+          if (sender !== userName) {
+            appendMessage(text, "received", sender);
+          }
+        };
+      }
+
+      // Enviar mensajes al servidor
+      sendButton.addEventListener("click", sendMessage);
+      messageInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") sendMessage();
+      });
+
+      function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+          const formattedMessage = `${userName}: ${message}`;
+          socket.send(formattedMessage); // Enviar mensaje al servidor
+          appendMessage(message, "sent");
+          messageInput.value = "";
+        }
+      }
+
+      // Mostrar mensaje en el chat
+      function appendMessage(message, type, sender = "") {
+        const p = document.createElement("div");
+        p.textContent = sender ? `${sender}: ${message}` : message;
+        p.className = `message ${type}`;
+        chatDiv.prepend(p); // Insertar al principio debido a flex-direction: column-reverse
+      }
+
+      // Cerrar sesión
+      logoutButton.addEventListener("click", () => {
+        localStorage.removeItem("chatUserName");
+        loginContainer.style.display = "block";
+        chatContainer.style.display = "none";
+      });
+    </script>
+  </body>
+</html>

@@ -1,8 +1,6 @@
-// app.js
-
-const { setupWebSocketServer } = require("./websocket/websocketService");
+const { setupWebSocketServer } = require("./modules/websocket/websocketService");
+const connectMongoDB = require("./config/mongodb");
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
 
@@ -12,38 +10,37 @@ const mainApp = express();
 const server = http.createServer(mainApp);
 
 mainApp.use(cors());
+mainApp.use(express.json());
+mainApp.use(express.urlencoded({ extended: true }));
 
-const MONGO_URI = process.env.MONGO_URI;
-const dbName = "fgpone";
-
-const connectDB = async () => {
+const startServer = async () => {
   try {
-    console.log(MONGO_URI);
-    await mongoose.connect(MONGO_URI, { dbName });
-    console.log("Conexión a la base de datos de mongodb/storeDB establecida");
+    await connectMongoDB();
+    server.listen(3000, () => {
+      console.log(`listening on http://localhost:3000/`);
+    });
   } catch (error) {
-    console.error("Error al conectar a la base de datos:", error);
+    console.error("Error starting the server:", error);
   }
 };
 
-// Conectar y escuchar
-connectDB().then(() => {
-  server.listen(process.env.PORT || 3000, () => {
-    console.log(`Main App listening on port http://localhost:${process.env.PORT || 3000}`);
-  });
-});
+startServer();
 
 // Configurar WebSocket
 setupWebSocketServer(server);
 
-mainApp.use("/contact", require("./contact/app.js"));
-mainApp.use("/img", require("./img/app.js"));
-mainApp.use("/login", require("./login/app.js"));
-mainApp.use("/note", require("./note/app.js"));
-mainApp.use("/notepad", require("./notepad/app.js"));
-mainApp.use("/stat", require("./stat/app.js"));
-mainApp.use("/feed", require("./feed/app.js"));
-mainApp.use("/chat", require("./websocket/chatRoutes"));
-mainApp.use("/", require("./shortener/app.js"));
+mainApp.use("/", express.static("public"));
 
-// mainApp.use(express.static("public"));
+const apiRouter = express.Router();
+
+apiRouter.use("/note", require("./modules/note/"));
+mainApp.use("/api", apiRouter);
+
+mainApp.use("/contact", require("./modules/contact/app.js"));
+mainApp.use("/img", require("./modules/img/app.js"));
+mainApp.use("/login", require("./modules/login/app.js"));
+mainApp.use("/feed", require("./modules/feed/app.js"));
+mainApp.use("/chat", require("./modules/websocket/chatRoutes"));
+mainApp.use("/stat", require("./modules/stat/app.js"));
+mainApp.use("/notepad", require("./modules/notepad/app.js"));
+mainApp.use("/", require("./modules/shortener/app.js"));

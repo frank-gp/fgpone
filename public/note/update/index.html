@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="../component/layout.css?2024_11_30" />
+
+    <title>Update Note</title>
+  </head>
+  <body>
+    <header></header>
+    <main class="container">
+      <h1>Update <a href="../">Note</a></h1>
+
+      <!-- Form to edit the note -->
+      <form id="update-note-form">
+        <input type="hidden" id="note-id" />
+        <!-- Hidden input for note ID -->
+
+        <div>
+          <label for="title">Title:</label>
+          <input type="text" id="title" name="title" required />
+        </div>
+
+        <div>
+          <label for="content">Content:</label>
+          <textarea id="content" name="content" rows="10" required></textarea>
+        </div>
+
+        <button type="submit">Update Note</button>
+        <div id="response-message"></div>
+      </form>
+
+      <section id="output"></section>
+    </main>
+    <footer></footer>
+
+    <script>
+      // Function to escape HTML characters to prevent XSS
+      const escapeHtml = (unsafe) => {
+        return unsafe.replace(/[&<>"']/g, (match) => {
+          const escapeMap = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;",
+          };
+          return escapeMap[match];
+        });
+      };
+
+      const renderNotes = (note) => {
+        const outputElement = document.getElementById("output");
+        outputElement.innerHTML = "";
+
+        const noteHTML = `
+            <div class="note">
+              <aside class="note_head">
+                <a href="/note/?${note._id}">ID: ${note._id}</a>
+                <h2>${note.title}</h2>
+              </aside>
+              <pre><code>${escapeHtml(note.content)}</code></pre>
+            </div>
+          `;
+
+        outputElement.innerHTML += noteHTML;
+      };
+
+      // Function to render the note data in the form
+      const renderNoteForUpdate = (note) => {
+        document.getElementById("note-id").value = note._id; // Set the note ID
+        document.getElementById("title").value = note.title;
+        document.getElementById("content").value = note.content;
+      };
+
+      // Function to handle updating the note
+      const updateNote = async (noteData) => {
+        try {
+          const noteId = document.getElementById("note-id").value;
+          const response = await fetch(`/api/note/${noteId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(noteData),
+          });
+
+          const data = await response.json();
+          renderNotes(data);
+          import("https://frankgp.com/lib/highlight.js");
+
+          if (response.ok) {
+            document.getElementById("response-message").textContent = "Note updated successfully!";
+            renderNoteForUpdate(data); // Optionally, update the form with the new data
+          } else {
+            document.getElementById("response-message").textContent = "Error updating note: " + data.error;
+          }
+        } catch (error) {
+          console.error("Error updating note:", error);
+          document.getElementById("response-message").textContent = "Error updating note: " + error.message;
+        }
+      };
+
+      // Obtener la URL actual
+      const url = new URL(window.location.href);
+      const param = url.search.replace("?", "");
+      console.log("param", param);
+
+      // Get the note ID from the URL and fetch the existing note
+      const getNoteIdFromUrl = () => {
+        const url = new URL(window.location.href);
+        const noteId = url.search.replace("?", "");
+        console.log("noteId", noteId);
+        if (noteId) {
+          fetchNoteById(noteId);
+        }
+      };
+
+      // Fetch the note data by ID
+      const fetchNoteById = async (id) => {
+        try {
+          const response = await fetch(`/api/note/${id}`);
+          const data = await response.json();
+          if (response.ok) {
+            renderNoteForUpdate(data); // Populate the form with existing data
+          } else {
+            document.getElementById("response-message").textContent = "Error fetching note: " + data.error;
+          }
+        } catch (error) {
+          console.error("Error fetching note:", error);
+          document.getElementById("response-message").textContent = "Error fetching note: " + error.message;
+        }
+      };
+
+      // Form submit event listener
+      document.getElementById("update-note-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const noteData = {
+          title: document.getElementById("title").value,
+          content: document.getElementById("content").value,
+        };
+
+        updateNote(noteData);
+      });
+
+      // Call this function to load the note when the page loads
+      getNoteIdFromUrl();
+    </script>
+  </body>
+</html>

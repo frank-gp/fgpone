@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="../component/layout.css?2024_11_30" />
+    <title>Create Note</title>
+  </head>
+  <body>
+    <header></header>
+    <main class="container">
+      <h1>Create New <a href="../">Note</a></h1>
+
+      <form id="create-note-form">
+        <div>
+          <label for="title">Title:</label>
+          <input type="text" id="title" name="title" required />
+        </div>
+
+        <div>
+          <label for="content">Content:</label>
+          <textarea id="content" name="content" rows="10" required></textarea>
+        </div>
+
+        <button type="submit">Create Note</button>
+        <div id="response-message"></div>
+      </form>
+
+      <section id="output"></section>
+    </main>
+    <footer></footer>
+
+    <script>
+      const escapeHtml = (unsafe) => {
+        return unsafe.replace(/[&<>"']/g, (match) => {
+          const escapeMap = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;",
+          };
+          return escapeMap[match];
+        });
+      };
+
+      const renderNotes = (note) => {
+        const outputElement = document.getElementById("output");
+        outputElement.innerHTML = "";
+
+        const noteHTML = `
+            <div class="note">
+              <aside class="note_head">
+                <a href="/note/?${note._id}">ID: ${note._id}</a>
+                <h2>${note.title}</h2>
+                <button class="display-none" onclick="deleteNote('${note._id}')">Delete</button>
+              </aside>
+              <pre><code>${escapeHtml(note.content)}</code></pre>
+            </div>
+          `;
+
+        outputElement.innerHTML += noteHTML;
+      };
+
+      const createNote = async (noteData) => {
+        try {
+          const response = await fetch("/api/note", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(noteData),
+          });
+
+          const data = await response.json();
+          renderNotes(data);
+          import("https://frankgp.com/lib/highlight.js");
+          if (response.ok) {
+            document.getElementById("response-message").textContent = "Note created successfully!";
+            document.getElementById("create-note-form").reset();
+          } else {
+            document.getElementById("response-message").textContent = "Error creating note: " + data.error;
+          }
+        } catch (error) {
+          console.error("Error creating note:", error);
+          document.getElementById("response-message").textContent = "Error creating note: " + error.message;
+        }
+      };
+
+      document.getElementById("create-note-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const noteData = {
+          title: document.getElementById("title").value,
+          content: document.getElementById("content").value,
+        };
+
+        createNote(noteData);
+      });
+    </script>
+    <link rel="preload" href="https://frankgp.com/lib/highlight.js" as="script" />
+  </body>
+</html>

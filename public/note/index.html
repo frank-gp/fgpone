@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+      <link rel="stylesheet" href="https://frank-gp.github.io/icon/icomoon/style.css" />
+      <link rel="stylesheet" href="./component/layout.css?2024_11_30" />
+      <title>Note</title>
+    </head>
+    <body>
+      <header></header>
+      <main class="container">
+        <h1>
+          <a href="./">Note</a>
+        </h1>
+
+        <section id="output"></section>
+      </main>
+      <footer></footer>
+
+      <script src="./component/layout.js"></script>
+
+      <script>
+        let showDeleteButtons = false;
+
+        // Función para hacer el fetch de todas las notas
+        const apiNoteAll = async () => {
+          try {
+            const response = await fetch("/api/note");
+            const data = await response.json();
+            console.log(data);
+            renderNotes(data); // Renderizamos las notas
+            import("https://frankgp.com/lib/highlight.js");
+          } catch (error) {
+            console.error("Error fetching data:", error);
+          }
+        };
+
+        // Función para hacer el fetch de las notas con el parámetro específico
+        const apiNoteByParam = async (param) => {
+          try {
+            const response = await fetch(`/api/note/search/${param}`);
+            const data = await response.json();
+            console.log("data", data);
+            renderNotes(data); // Renderizamos las notas filtradas
+            import("https://frankgp.com/lib/highlight.js");
+          } catch (error) {
+            console.error("Error fetching data by param:", error);
+          }
+        };
+
+        // Función para escapar caracteres HTML (para prevenir interpretación de HTML)
+        const escapeHtml = (unsafe) => {
+          return unsafe.replace(/[&<>"']/g, (match) => {
+            const escapeMap = {
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#039;",
+            };
+            return escapeMap[match];
+          });
+        };
+
+        // Función para eliminar una nota
+        const deleteNote = async (noteId) => {
+          const userConfirmed = confirm(`Are you sure you want to delete the note with ID ${noteId}?`);
+          if (!userConfirmed) return;
+
+          try {
+            const response = await fetch(`/api/note/${noteId}`, {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+
+            if (response.ok) {
+              alert(`Nota con ID ${noteId} eliminada`);
+              await apiNoteAll(); // Recargar las notas después de la eliminación
+              await import("https://frankgp.com/lib/highlight.js");
+            } else {
+              alert(`Error al eliminar la nota con ID ${noteId}`);
+            }
+          } catch (error) {
+            console.error("Error deleting note:", error);
+          }
+        };
+
+        // Función para renderizar las notas en el HTML usando template literals
+        const renderNotes = async (notes) => {
+          const outputElement = document.getElementById("output");
+          outputElement.innerHTML = ""; // Limpiar el contenido previo
+
+          notes.forEach((note) => {
+            // Usamos template literals para construir el HTML
+            const noteHTML = `
+            <div class="note display_data">
+              <h2 class="note_title">
+                <a href="/note/?${note._id}">${note.title}</a>
+              </h2>
+              <aside class="note_head">
+                <button class="display-none">
+                  <a href="/note/add" target="_blank">Add</a>
+                </button>
+                <button class="display-none button-update">
+                  <a href="/note/update?${note._id}" target="_blank">Edit</a>
+                </button>
+                <button class="display-none button-delete" onclick="deleteNote('${note._id}')">Delete</button>
+                <a href="/note/?${note._id}" target="_blank">${note._id}</a>
+                <button class="copy-btn">Copy<span class="mobile_none"> code </span></button>
+              </aside>
+              <div class="code_container">
+                <aside class="line-numbers">
+                  <span></span>
+                  <!-- Line numbers will be generated here -->
+                </aside>
+                <aside class="code-editor">
+                  <pre><code class="code">${escapeHtml(note.content)}</code></pre>
+                </aside>
+              </div>
+            </div>
+          `;
+            // <pre><code class="code">${escapeHtml(note.content)}</code></pre>
+
+            // Agregar el HTML de la nota al contenedor principal
+            outputElement.innerHTML += noteHTML;
+            copyCode();
+            updateLineNumbers();
+          });
+        };
+
+        // Función para manejar la combinación de teclas Ctrl + Space
+        const handleKeyDown = (event) => {
+          console.log("111");
+          // Verificar si Ctrl y Space están presionados
+          if (event.ctrlKey && event.code === "Space") {
+            console.log("Ctrl + Space presionados");
+            // display-none
+            const deleteButtons = document.querySelectorAll(".display-none");
+            // showDeleteButtons = !showDeleteButtons; // Alternar la visibilidad
+            deleteButtons.forEach((button) => {
+              button.classList.toggle("display-none");
+            });
+          }
+        };
+        document.addEventListener("keydown", handleKeyDown);
+
+        // Obtener la URL actual
+        const url = new URL(window.location.href);
+
+        if (url.search) {
+          const param = url.search.replace("?", "");
+          // Si el parámetro existe, hacemos el fetch por el parámetro
+          apiNoteByParam(param);
+        } else {
+          // Si no existe, hacemos el fetch de todas las notas
+          apiNoteAll();
+        }
+
+        // ========== copy_buttons... ==========
+        const copyCode = () => {
+          // Add event listeners for copy buttons
+          const copyButtons = document.querySelectorAll(".copy-btn");
+          copyButtons.forEach((button) => {
+            button.addEventListener("click", function () {
+              console.log("copyButtons", copyButtons);
+              // const codeElement = this.parentElement.querySelector('code');
+              const codeElement = this.parentElement.parentElement.querySelector("code");
+
+              if (codeElement) {
+                const text = codeElement.innerText;
+                navigator.clipboard
+                  .writeText(text)
+                  .then(() => {
+                    this.textContent = "✅ Copied!";
+                    this.classList.add("copy-btn-animation");
+                    setTimeout(() => {
+                      this.innerHTML = "Copy<span class='mobile_none'> code </span>";
+                      this.classList.remove("copy-btn-animation");
+                    }, 3000);
+                  })
+                  .catch((err) => {
+                    console.error("Failed to copy:", err);
+                  });
+              }
+            });
+          });
+        };
+
+        // ========== copy_buttons. ==========
+
+        // ========== Textarea with Line Numbers... ==========
+        function updateLineNumbers() {
+          const codeElements = document.querySelectorAll(".code");
+          codeElements.forEach((codeElement) => {
+            const lines = codeElement.textContent.split("\n").length;
+            const lineNumbersWrapper = codeElement.closest(".container").querySelector(".line-numbers");
+            lineNumbersWrapper.innerHTML = "";
+            for (let i = 2; i <= lines; i++) {
+              const span = document.createElement("span");
+              lineNumbersWrapper.appendChild(span);
+            }
+          });
+        }
+        // Initial line numbers update
+        // updateLineNumbers();
+        // ========== Textarea with Line Numbers. ==========
+      </script>
+    </body>
+  </html>
+</html>

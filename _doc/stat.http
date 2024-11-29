@@ -1,0 +1,25 @@
+
+
+###
+GET http://localhost:3000/stat/get_data
+
+###
+GET https://fgp.one/stat/get_data
+
+###
+GET http://localhost:3000/stat/2403180827
+
+###
+DELETE http://localhost:3000/stat
+
+
+
+###
+POST http://localhost:3000/stat
+Content-Type: application/json
+
+{
+    "_id": 2403180827,
+    "user": "Daniel",
+    "code": "const carritoCompras=require('../index');\n\ndescribe('probando testind',()=>{\n    it('verdadero es igual a verdadero', () => {\n        expect(true).toBe(true);\n    });\n})\n// Desarrolla una clase en JavaScript llamada CarritoCompra que represente un carrito de compras. La clase debe tener los siguientes métodos:\ndescribe('Instancia de carro de compras',()=>{\n    it('Instacia',()=>{\n        let newCarrito= new carritoCompras()\n        expect(newCarrito).toBeInstanceOf(carritoCompras);\n    });\n});\n// constructor(): Inicializa el carrito como un array vacío.\n// Investigar para crear testing sin crear el constructor en el index.\ndescribe('Constructor',()=>{\n    it('Propiedades',()=>{\n        let newCarrito= new carritoCompras()\n       //console.log (newCarrito.productos);\n       expect(newCarrito.productos).toEqual([])\n\n\n    });\n\n})\n// agregarProducto(producto): Recibe un objeto representando un producto y lo agrega al carrito.\ndescribe('Agragar producto',()=>{\n    let newCarrito= new carritoCompras()\n    const producto1={nombre:'vegetales',precio:50,cantidad:10};\n    // const agregarProducto=(productoParametro)=>{\n    // newCarrito.productos.push(productoParametro)}\n    // agregarProducto(producto1);\n    newCarrito.agregarProducto(producto1);\n\n    \n\n   // console.log(newCarrito.productos);\n    it('agregado',()=>{\n   \n        expect(newCarrito.productos).toEqual([producto1]);\n    })\n    \n})\n// calcularTotal(): Calcula el total de la compra sumando los precios de todos los productos en el carrito.\ndescribe('calcular total',()=>{\n    it('Multiplicar cantidad y precio',()=>{\n        let newCarrito= new carritoCompras()\n        const producto1={nombre:'vegetales',precio:50,cantidad:10};\n        newCarrito.agregarProducto(producto1);\n        newCarrito.agregarProducto(producto1);\n       // console.log(newCarrito.productos[0].precio)\n       \n       \n        // const calcularTotal=()=> {  let sumaDeProductos=0;\n       \n        //     for(let i=0 ;i<newCarrito.productos.length; i++){\n        //      const precio=newCarrito.productos[i].precio\n        //      const cantidad=newCarrito.productos[i].cantidad\n        //      const totalDeUnSoloObjeto=precio*cantidad;\n        //      sumaDeProductos+=totalDeUnSoloObjeto;\n     \n            \n        //  }\n        //  console.log(sumaDeProductos); \n\n        //  return sumaDeProductos;\n    \n        // }\n\n       expect(newCarrito.calcularTotal()).toBe(1000);\n    })\n})\n\n// aplicarDescuento(porcentaje): Aplica un descuento al total de la compra según el porcentaje especificado.\ndescribe('Aplicar descuento',()=>{\n    it('10% de descuento',()=>{\n        const newCarrito= new carritoCompras();\n        const producto1={nombre:'vegetales',precio:50,cantidad:10};\n        newCarrito.agregarProducto(producto1);\n        \n    //     const aplicarDescuento=(porcentaje)=>{\n    //         const precioTotal= newCarrito.calcularTotal();\n    //         return precioTotal - (precioTotal*((porcentaje/100)))\n\n    //    }\n        //console.log(aplicarDescuento(10));\n\n        expect(newCarrito.aplicarDescuento(10)).toBe(450);\n    })\n})"
+}

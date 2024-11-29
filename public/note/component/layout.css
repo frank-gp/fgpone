@@ -1,0 +1,140 @@
+h1,
+h2,
+h3 {
+  text-align: center;
+}
+button a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.display-none {
+  display: none;
+}
+button.button-delete {
+  background-color: red;
+  border: none;
+}
+button.button-update {
+  background-color: green;
+  border: none;
+}
+.note_head {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  align-content: center;
+  /* gap: 0.5em; */
+  > * {
+    margin: 0.2em;
+    padding: 0.2em 0.5em;
+  }
+}
+
+main form,
+section {
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+/* ========== data-theme... ========== */
+#themeToggleButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  /* background-color: #007bff; */
+  /* color: #fff; */
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  background-color: var(--pico-background-color);
+  color: var(--pico-color);
+}
+
+/* ========== data-theme. ========== */
+
+@keyframes fade {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.copy-btn-animation {
+  animation: fade 1s infinite; /* Apply animation */
+}
+.copy-btn {
+  margin-left: auto;
+}
+.note_title {
+  text-align: left;
+}
+
+/* <display_data> */
+.display_data .code_container * {
+  font-family: monospace;
+  /* font-size: 16px; */
+  margin: 0;
+  padding: 0;
+}
+
+.display_data .code_container {
+  display: flex;
+  margin-bottom: 1em;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.display_data .line-numbers {
+  counter-reset: line;
+  padding: 10px;
+  background-color: #f0f0f0;
+  background-color: #001;
+  font-family: monospace;
+  font-size: 12.8px;
+}
+
+.display_data .line-numbers span {
+  counter-increment: line;
+  display: block;
+}
+
+.display_data .line-numbers span:before {
+  content: counter(line);
+  display: inline-block;
+  width: 20px;
+  text-align: right;
+  margin-right: 5px;
+  color: #999;
+}
+
+.display_data .code-editor {
+  flex-grow: 1;
+  position: relative;
+}
+
+.display_data .code-editor code {
+  /* width: 100%; */
+  /* padding: 10px; */
+  font-family: monospace;
+  /* border: 1px solid #ccc; */
+  /* background-color: #f9f9f9; */
+  /* white-space: pre-wrap; */
+}
+
+.display_data pre code.hljs {
+  padding: 10px !important;
+}
+/* </display_data> */
+
+pre code {
+  font-family: monospace !important;
+  font-size: 12.8px !important;
+}

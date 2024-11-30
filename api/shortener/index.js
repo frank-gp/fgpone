@@ -31,35 +31,31 @@ const shortenerSchema = new mongoose.Schema({
 });
 
 // const ShortenerModel = mongoose.model("shortener", shortenerSchema);
-const Url = mongoose.model("shortener", shortenerSchema);
+const ShortenerModel = mongoose.model("shortener", shortenerSchema);
 
 // ==========  ==========
 
+// Ruta para acortar una URL || CREATE
 notepadRouter.post("/shorten", async (req, res) => {
   const { originalUrl, shortUrl } = req.body;
-
   if (!originalUrl || !shortUrl) {
     return res.status(400).json({ error: "La URL original y el shortUrl son requeridos" });
   }
-
   try {
     // Verificar si el shortUrl ya está en uso
-    const existingUrl = await Url.findOne({ shortUrl });
+    const existingUrl = await ShortenerModel.findOne({ shortUrl });
     if (existingUrl) {
       return res.status(400).json({ error: "El shortUrl ya está en uso" });
     }
-
     const _id =
       req.body._id ||
       new Date()
         .toISOString()
         .replace(/[^0-9]/g, "")
         .slice(2, 14); // Generar _id si no existe en el cuerpo
-
     // Almacenar la URL en la base de datos
-    const url = new Url({ originalUrl, shortUrl, _id });
+    const url = new ShortenerModel({ originalUrl, shortUrl, _id });
     await url.save();
-
     res.status(201).json({
       originalUrl,
       shortUrl: `http://localhost:3000/${shortUrl}`, // El enlace acortado
@@ -70,12 +66,59 @@ notepadRouter.post("/shorten", async (req, res) => {
   }
 });
 
+// Obtener una Elemento por ID
+notepadRouter.get("/byId/:id", async (req, res) => {
+  try {
+    const note = await ShortenerModel.findById(req.params.id);
+    if (!note) {
+      return res.status(404).json({ error: "Elemento no encontrada" });
+    }
+    res.json(note);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener la nota" });
+  }
+});
+
+notepadRouter.get("/:shortUrl", async (req, res, next) => {
+  const { shortUrl } = req.params;
+  const queryParams = req.query; // Captura cualquier parámetro adicional en la URL corta
+  try {
+    // Buscar la URL original en la base de datos
+    const url = await ShortenerModel.findOne({ shortUrl });
+
+    // Si no se encuentra la URL, continuar con la lógica personalizada
+    if (!url) {
+      console.log(`URL corta no encontrada para: ${shortUrl}`);
+      // Aquí puedes añadir cualquier lógica adicional o personalización
+      // Por ejemplo, puedes decidir mostrar una página estática o procesar alguna acción
+      return next(); // Pasar al siguiente middleware o ruta
+    }
+
+    // Incrementar el contador de visitas si la URL existe
+    url.visitCount += 1;
+    await url.save();
+
+    // Si la URL original contiene parámetros adicionales, agregar los nuevos parámetros
+    const redirectUrl = new URL(url.originalUrl);
+    Object.keys(queryParams).forEach((key) => {
+      redirectUrl.searchParams.append(key, queryParams[key]);
+    });
+
+    // Redirigir a la URL original con los parámetros adicionales
+    return res.redirect(301, redirectUrl.toString());
+  } catch (error) {
+    console.error("Error al redirigir:", error);
+    return res.status(500).json({ error: "Error al procesar la redirección" });
+  }
+});
+
+// Endpoint para obtener estadísticas de la URL
 notepadRouter.get("/stats/:shortUrl", async (req, res) => {
   const { shortUrl } = req.params;
 
   try {
     // Buscar la URL en la base de datos
-    const url = await Url.findOne({ shortUrl });
+    const url = await ShortenerModel.findOne({ shortUrl });
 
     if (!url) {
       return res.status(404).json({ error: "URL no encontrada" });
@@ -88,34 +131,11 @@ notepadRouter.get("/stats/:shortUrl", async (req, res) => {
   }
 });
 
-notepadRouter.get("/:shortUrl", async (req, res) => {
-  const { shortUrl } = req.params;
-
-  try {
-    // Buscar la URL en la base de datos
-    const url = await Url.findOne({ shortUrl });
-
-    if (!url) {
-      return res.status(404).json({ error: "URL no encontrada" });
-    }
-
-    // Incrementar el contador de visitas
-    url.visitCount += 1;
-    await url.save();
-
-    // Redirigir a la URL original
-    res.redirect(url.originalUrl);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al redirigir a la URL" });
-  }
-});
-
 // ==========  ==========
 
-notepadRouter.get("/", async (req, res) => {
+notepadRouter.get("/shortener", async (req, res) => {
   try {
-    const find = await Url.find().sort({ _id: -1 });
+    const find = await ShortenerModel.find().sort({ _id: -1 });
     res.status(200).json(find);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener las notas" });
@@ -128,21 +148,21 @@ notepadRouter.get("/search/:query", async (req, res) => {
     const { query } = req.params; // Obtener el parámetro "query" de la URL
 
     // Buscar notas cuyo ID comience con el texto proporcionado y ordenarlas en orden descendente
-    const matchingNotes = await Url.find({
+    const matchingNotes = await ShortenerModel.find({
       _id: { $regex: `^${query}`, $options: "i" }, // Buscando por _id
     }).sort({ _id: -1 }); // Ordenar en orden descendente por _id
 
     if (!matchingNotes || matchingNotes.length === 0) {
-      return res.status(404).json({ error: "Nota no encontrada" });
+      return res.status(404).json({ error: "Elemento no encontrada" });
     }
 
     res.status(200).json(matchingNotes);
   } catch (error) {
-    res.status(500).json({ error: "Error al buscar la nota por ID" });
+    res.status(500).json({ error: "Error al buscar la Elemento por ID" });
   }
 });
 
-notepadRouter.get("/backups-list", (req, res) => {
+notepadRouter.post("/backups-list", (req, res) => {
   const backupDir = path.resolve(__dirname, "backups"); // Asegúrate de que esta sea la ruta correcta
 
   // Verificar si el directorio de respaldos existe
@@ -169,9 +189,9 @@ notepadRouter.get("/backups-list", (req, res) => {
   });
 });
 
-notepadRouter.get("/backup", async (req, res) => {
+notepadRouter.post("/backup", async (req, res) => {
   try {
-    const notes = await Url.find().sort({ _id: -1 });
+    const notes = await ShortenerModel.find().sort({ _id: -1 });
     // const backupPath = `backup-notes-${new Date().toISOString()}.json`;
     const newDate = new Date()
       .toISOString()
@@ -197,19 +217,6 @@ notepadRouter.get("/backup", async (req, res) => {
   }
 });
 
-// Obtener una nota por ID
-notepadRouter.get("/:id", async (req, res) => {
-  try {
-    const note = await Url.findById(req.params.id);
-    if (!note) {
-      return res.status(404).json({ error: "Nota no encontrada" });
-    }
-    res.json(note);
-  } catch (error) {
-    res.status(500).json({ error: "Error al obtener la nota" });
-  }
-});
-
 notepadRouter.post("/", async (req, res) => {
   try {
     const reqBody = req.body;
@@ -222,8 +229,8 @@ notepadRouter.post("/", async (req, res) => {
         .replace(/[^0-9]/g, "")
         .slice(2, 14); // Generar _id si no existe en el cuerpo
 
-    // Crear la nota con el _id (proporcionado o generado)
-    const noteCreated = await Url.create({ ...reqBody, _id });
+    // Crear la Elemento con el _id (proporcionado o generado)
+    const noteCreated = await ShortenerModel.create({ ...reqBody, _id });
 
     res.status(201).json(noteCreated);
   } catch (error) {
@@ -238,10 +245,10 @@ notepadRouter.post("/restore/multer", upload.single("backup"), async (req, res) 
     // Leer y parsear los datos del respaldo
     const backupData = JSON.parse(fs.readFileSync(backupPath, "utf-8"));
 
-    await Url.deleteMany({});
+    await ShortenerModel.deleteMany({});
 
     // Restaurar los datos en la base de datos
-    const inserted = await Url.insertMany(backupData, { ordered: true });
+    const inserted = await ShortenerModel.insertMany(backupData, { ordered: true });
 
     // Eliminar el archivo subido para evitar acumulación
     // fs.unlinkSync(backupPath);
@@ -271,9 +278,9 @@ notepadRouter.post("/restore/:fileName", async (req, res) => {
     // Leer los datos del archivo de respaldo
     const backupData = JSON.parse(fs.readFileSync(backupPath, "utf-8"));
 
-    await Url.deleteMany({});
+    await ShortenerModel.deleteMany({});
     // Restaurar los datos en la base de datos
-    const inserted = await Url.insertMany(backupData, { ordered: true });
+    const inserted = await ShortenerModel.insertMany(backupData, { ordered: true });
 
     res.status(200).json({
       message: "Restauración completada con éxito",
@@ -285,13 +292,24 @@ notepadRouter.post("/restore/:fileName", async (req, res) => {
   }
 });
 
-// Actualizar una nota por ID
+// Endpoint to reset all visit counts || UPDATE
+notepadRouter.post("/reset-visit-count", async (req, res) => {
+  try {
+    // Update all documents to set visitCount to 0
+    await ShortenerModel.updateMany({}, { visitCount: 0 });
+    res.status(200).json({ message: "Visit counts have been reset for all URLs" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error resetting visit counts" });
+  }
+});
+
+// Actualizar una Elemento por ID
 notepadRouter.put("/:id", async (req, res) => {
   try {
-    const { title, content } = req.body;
-    const updatedNote = await Url.findByIdAndUpdate(req.params.id, { title, content }, { new: true, runValidators: true });
+    const updatedNote = await ShortenerModel.findByIdAndUpdate(req.params.id, { ...req.body }, { new: true, runValidators: true });
     if (!updatedNote) {
-      return res.status(404).json({ error: "Nota no encontrada" });
+      return res.status(404).json({ error: "Elemento no encontrada" });
     }
     res.json(updatedNote);
   } catch (error) {
@@ -303,7 +321,7 @@ notepadRouter.put("/:id", async (req, res) => {
 notepadRouter.delete("/delete-all", async (req, res) => {
   console.log("delete-all");
   try {
-    const result = await Url.deleteMany({});
+    const result = await ShortenerModel.deleteMany({});
     res.json({ message: "Todas las notas han sido eliminadas", deletedCount: result.deletedCount });
   } catch (error) {
     res.status(500).json({ error: "Error al eliminar todas las notas" });
@@ -331,14 +349,14 @@ notepadRouter.delete("/backup/:filename", (req, res) => {
   });
 });
 
-// Eliminar una nota por ID
+// Eliminar una Elemento por ID
 notepadRouter.delete("/:id", async (req, res) => {
   try {
-    const deletedNote = await Url.findByIdAndDelete(req.params.id);
+    const deletedNote = await ShortenerModel.findByIdAndDelete(req.params.id);
     if (!deletedNote) {
-      return res.status(404).json({ error: "Nota no encontrada" });
+      return res.status(404).json({ error: "Elemento no encontrada" });
     }
-    res.json({ message: "Nota eliminada correctamente" });
+    res.json({ message: "Elemento eliminada correctamente" });
   } catch (error) {
     res.status(500).json({ error: "Error al eliminar la nota" });
   }

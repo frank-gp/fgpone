@@ -1,0 +1,66 @@
+###
+POST http://localhost:3000/api/shortener/shorten
+Content-Type: application/json
+
+{
+  "originalUrl": "https://www.example0.com",
+  "shortUrl": "mi-acortada"
+}
+
+###
+GET http://localhost:3000/api/shortener/
+
+###
+# GET http://localhost:3000/api/shortener/contact?param1=value1
+
+###
+GET http://localhost:3000/api/shortener/stats/mi-acortada1
+
+
+
+###
+GET http://localhost:3000/api/shortener/shortened-does-not-exist
+
+# ==========  ==========
+
+###
+GET http://localhost:3000/api/shortener/search/2411
+Content-Type: application/json
+
+###
+GET http://localhost:3000/api/shortener/byId/241130034604
+Content-Type: application/json
+
+###
+PUT http://localhost:3000/api/shortener/241130034604
+Content-Type: application/json
+
+{
+  "originalUrl": "https://www.example.com",
+  "shortUrl": "mi-acortada2"
+}
+
+###
+DELETE http://localhost:3000/api/shortener/241130034604
+Content-Type: application/json
+
+###
+DELETE http://localhost:3000/api/shortener/delete-all
+Content-Type: application/json
+
+
+
+### ========== backup ==========
+
+###
+POST http://localhost:3000/api/shortener/backup
+
+###
+POST http://localhost:3000/api/shortener/backups-list
+
+###
+POST http://localhost:3000/api/shortener/restore/output.json
+
+###
+DELETE http://localhost:3000/api/shortener/backup/backup-notes-241130032448.json
+

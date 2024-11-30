@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://frankgp.com/component/stat.js" type="module"></script>
+    <!-- <script src="https://frankgp.com/component/layout.js" type="module"></script> -->
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <title>URL Shortener with NodeJS</title>
+    <style>
+      table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid #ddd4 !important;
+        text-align: left;
+        /* cursor: pointer; */
+        white-space: nowrap;
+        padding: 0.3em 1em;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        color: #000;
+      }
+
+      button {
+        margin: 10px;
+        display: none; /* Initially hide the button */
+      }
+      h1 {
+        text-align: center;
+      }
+      tr > td:nth-child(2) {
+        cursor: pointer;
+        color: cornflowerblue;
+        text-decoration: underline;
+        /* border-bottom: 1px solid peru; */
+      }
+      tr > td:nth-child(3) {
+        /* background-color: peru; */
+        max-width: 45ch; /* Set the desired width */
+        overflow: hidden; /* Hide overflow content */
+        white-space: nowrap; /* Prevent text from wrapping */
+        /* cursor: initial; */
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>"Shorten Your Path to Success: Our URL Shortening Service Delivers Big Results!"</h1>
+      <p>
+        "Ready to take your brand to the next level? Contact us now to experience the power of our URL shortening service. Shorten your links, expand your reach, and delight your
+        customers. Let's elevate your online presence together!"
+        <a href="http://frankgp.com/contact" target="_blank" rel="noopener noreferrer"></a>
+      </p>
+      <p id="rows" style="font-size: 4em; text-align: center"></p>
+      <!-- <button id="resetButton" onclick="resetVisits()">Reset All Visits</button> -->
+
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('visits')">Visits</th>
+            <th onclick="sortTable('shortUrl')">Short URL</th>
+            <th onclick="sortTable('longUrl')">Long URL</th>
+          </tr>
+        </thead>
+        <tbody id="urlTableBody">
+          <!-- Table rows will be dynamically generated here -->
+        </tbody>
+      </table>
+
+      <script>
+        let currentSortColumn = "visits";
+        let sortDirection = "desc";
+
+        async function fetchData() {
+          try {
+            const response = await fetch("/get-data");
+            const data = await response.json();
+            updateTable(data);
+
+            const spanRows = document.querySelector("#rows");
+            const tableRows = document.querySelector("table").rows.length;
+            spanRows.textContent = tableRows;
+          } catch (error) {
+            console.error("Error fetching data:", error);
+          }
+        }
+
+        function updateTable(data) {
+          const tableBody = document.getElementById("urlTableBody");
+          tableBody.innerHTML = "";
+
+          // Sort the data based on the current column and direction
+          const sortedData = sortData(data, currentSortColumn, sortDirection);
+
+          Object.keys(sortedData).forEach((shortUrl) => {
+            const { visits, longUrl } = sortedData[shortUrl];
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+          <td>${visits}</td>
+          <td><a class="shortUrl_td" href="/${shortUrl}" target="_blank">${shortUrl}</a></td>
+          <td>${longUrl}</td>
+        `;
+
+            // ========== insert_before_hostname... ==========
+            const cssHostname = /* css */ `
+  .shortUrl_td::before {
+    content: "${window.location.hostname}/";
+
+  }
+
+`;
+            const styleElement = document.createElement("style");
+            styleElement.innerHTML = cssHostname;
+            document.head.appendChild(styleElement);
+
+            // ========== insert_before_hostname. ==========
+
+            tableBody.appendChild(row);
+          });
+        }
+
+        function sortTable(column) {
+          // Toggle the sort direction if clicking on the same column
+          if (column === currentSortColumn) {
+            sortDirection = sortDirection === "asc" ? "desc" : "asc";
+          } else {
+            // Reset the sort direction if clicking on a different column
+            currentSortColumn = column;
+            sortDirection = "asc";
+          }
+
+          fetchData(); // Refresh the table after sorting
+        }
+
+        // Sort the data based on the specified column and direction
+        function sortData(data, column, direction) {
+          return Object.entries(data)
+            .sort((a, b) => {
+              const aValue = column === "shortUrl" ? a[0] : a[1][column];
+              const bValue = column === "shortUrl" ? b[0] : b[1][column];
+
+              if (direction === "asc") {
+                return aValue > bValue ? 1 : -1;
+              } else {
+                return aValue < bValue ? 1 : -1;
+              }
+            })
+            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+        }
+
+        async function resetVisits() {
+          try {
+            const response = await fetch("/reset-visits", { method: "POST" });
+            if (response.ok) {
+              console.log("All visit counts reset to 0.");
+              fetchData(); // Refresh the table after resetting visits
+            } else {
+              console.error("Failed to reset visit counts.");
+            }
+          } catch (error) {
+            console.error("Error resetting visit counts:", error);
+          }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+          fetchData();
+        });
+
+        // Toggle the visibility of the button
+        // function toggleButtonVisibility() {
+        //   const button = document.getElementById("resetButton");
+        //   button.style.display = button.style.display === "none" ? "block" : "none";
+        // }
+      </script>
+    </main>
+  </body>
+</html>

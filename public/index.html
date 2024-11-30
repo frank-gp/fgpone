@@ -1,188 +1,396 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script src="https://frankgp.com/component/stat.js" type="module"></script>
-    <!-- <script src="https://frankgp.com/component/layout.js" type="module"></script> -->
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="robots" content="noindex, nofollow" />
-
-    <title>URL Shortener with NodeJS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="https://frankgp.com/icon/icomoon/style.css" />
+    <title>URL Shortener</title>
     <style>
+      body {
+        max-width: 40rem;
+        margin: 1em auto;
+      }
+      .btn-logout {
+        margin-left: auto;
+        text-align: left;
+        border: node;
+        display: block;
+      }
+      .submit_container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1em;
+        box-sizing: border-box;
+      }
       table {
-        width: 80%;
-        margin: 20px auto;
+        width: 100%;
+        margin-top: 20px;
         border-collapse: collapse;
       }
-
-      th,
-      td {
-        padding: 10px;
-        border: 1px solid #ddd4 !important;
-        text-align: left;
-        /* cursor: pointer; */
-        white-space: nowrap;
-        padding: 0.3em 1em;
-      }
-
       th {
-        background-color: #f2f2f2;
         color: #000;
       }
-
-      button {
-        margin: 10px;
-        display: none; /* Initially hide the button */
+      th,
+      td {
+        padding: 8px;
+        text-align: left;
+        border: 1px solid #ddd;
       }
-      h1 {
-        text-align: center;
-      }
-      tr > td:nth-child(2) {
+      th {
+        background-color: #f4f4f4;
         cursor: pointer;
-        color: cornflowerblue;
-        text-decoration: underline;
-        /* border-bottom: 1px solid peru; */
       }
-      tr > td:nth-child(3) {
-        /* background-color: peru; */
-        max-width: 45ch; /* Set the desired width */
-        overflow: hidden; /* Hide overflow content */
-        white-space: nowrap; /* Prevent text from wrapping */
-        /* cursor: initial; */
+      td a {
+        color: #007bff;
+        text-decoration: none;
+      }
+      td a:hover {
+        text-decoration: underline;
+      }
+      .action-btns {
+        display: flex;
+        gap: 10px;
+      }
+      .action-btns button {
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+      .btn-delete {
+        background-color: red;
+        color: #fff;
+        border: none;
+      }
+
+      #updateModal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+        background: white;
+        padding: 1em;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        > * {
+          color: #000;
+        }
+        label {
+          color: #000;
+        }
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>"Shorten Your Path to Success: Our URL Shortening Service Delivers Big Results!"</h1>
-      <p>
-        "Ready to take your brand to the next level? Contact us now to experience the power of our URL shortening service. Shorten your links, expand your reach, and delight your
-        customers. Let's elevate your online presence together!"
-        <a href="http://frankgp.com/contact" target="_blank" rel="noopener noreferrer"></a>
-      </p>
-      <p id="rows" style="font-size: 4em; text-align: center"></p>
-      <!-- <button id="resetButton" onclick="resetVisits()">Reset All Visits</button> -->
+    <header></header>
+    <main class="container">
+      <!-- Login Section -->
+      <section id="loginSection">
+        <h1>Login</h1>
+        <form onsubmit="login(event)">
+          <label for="username">Username:</label>
+          <input type="text" id="username" required /><br /><br />
+          <label for="password">Password:</label>
+          <input type="password" id="password" required /><br /><br />
+          <button type="submit">Login</button>
+        </form>
+      </section>
 
-      <table>
-        <thead>
-          <tr>
-            <th onclick="sortTable('visits')">Visits</th>
-            <th onclick="sortTable('shortUrl')">Short URL</th>
-            <th onclick="sortTable('longUrl')">Long URL</th>
-          </tr>
-        </thead>
-        <tbody id="urlTableBody">
-          <!-- Table rows will be dynamically generated here -->
-        </tbody>
-      </table>
+      <!-- URL Shortener Section (Visible after login) -->
+      <section id="shortenerSection" style="display: none">
+        <button class="btn-logout" onclick="logout()">Logout</button>
+        <h1>URL Shortener</h1>
+        <form onsubmit="createShortenUrl(event)">
+          <label for="originalUrl">Original URL:</label>
+          <input type="url" id="originalUrl" required placeholder="https://www.example.com" /><br /><br />
+          <aside class="submit_container">
+            <div>
+              <label for="shortUrl">Custom Short URL:</label>
+              <input type="text" id="shortUrl" required placeholder="example" /><br /><br />
+            </div>
+            <button type="submit">Shorten URL</button>
+          </aside>
+        </form>
 
-      <script>
-        let currentSortColumn = "visits";
-        let sortDirection = "desc";
+        <h2>All Shortened URLs</h2>
+        <button onclick="getAllUrls()">Get All URLs</button>
+        <button onclick="resetVisitCounts()">Reset Visit Counts</button>
 
-        async function fetchData() {
-          try {
-            const response = await fetch("/get-data");
-            const data = await response.json();
-            updateTable(data);
+        <table id="urlsTable">
+          <thead>
+            <tr>
+              <th onclick="sortTable(2)">Visit</th>
+              <th onclick="sortTable(1)">Short URL</th>
+              <th>Actions</th>
+              <th onclick="sortTable(3)">ID</th>
+              <th onclick="sortTable(0)">Original URL</th>
+            </tr>
+          </thead>
+          <tbody id="urlsList"></tbody>
+        </table>
+      </section>
+      <section>
+        <!-- Modal for updating URL -->
+        <div id="updateModal">
+          <h2>Update URL</h2>
+          <form id="updateForm" onsubmit="updateUrl(event)">
+            <label for="updateOriginalUrl">Original URL:</label>
+            <input type="url" id="updateOriginalUrl" required /><br /><br />
+            <label for="updateShortUrl">Short URL:</label>
+            <input type="text" id="updateShortUrl" required /><br /><br />
+            <input type="hidden" id="updateUrlId" />
+            <button type="submit">Save Changes</button>
+            <button type="button" onclick="closeUpdateModal()">Cancel</button>
+          </form>
+        </div>
+      </section>
+    </main>
+    <footer></footer>
+    <script>
+      let sortOrder = {
+        0: true, // Original URL (ascending by default)
+        1: true, // Short URL (ascending by default)
+        2: false, // Visit Count (descending by default)
+        3: true, // Created At (ascending by default)
+      };
 
-            const spanRows = document.querySelector("#rows");
-            const tableRows = document.querySelector("table").rows.length;
-            spanRows.textContent = tableRows;
-          } catch (error) {
-            console.error("Error fetching data:", error);
-          }
+      // Check if user is already logged in
+      window.onload = function () {
+        const isAuthenticated = localStorage.getItem("isAuthenticated");
+        if (isAuthenticated === "true") {
+          document.getElementById("loginSection").style.display = "none";
+          document.getElementById("shortenerSection").style.display = "block";
+          getAllUrls(); // Display the list of shortened URLs
+        } else {
+          document.getElementById("loginSection").style.display = "block";
+          document.getElementById("shortenerSection").style.display = "none";
         }
+      };
 
-        function updateTable(data) {
-          const tableBody = document.getElementById("urlTableBody");
-          tableBody.innerHTML = "";
+      // Function to handle login
+      function login(event) {
+        event.preventDefault();
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
 
-          // Sort the data based on the current column and direction
-          const sortedData = sortData(data, currentSortColumn, sortDirection);
+        const user = atob("ZmdwNTU1");
+        const pass = atob("RWxlY3Ryb241LnBl");
 
-          Object.keys(sortedData).forEach((shortUrl) => {
-            const { visits, longUrl } = sortedData[shortUrl];
-
-            const row = document.createElement("tr");
-            row.innerHTML = `
-          <td>${visits}</td>
-          <td><a class="shortUrl_td" href="/${shortUrl}" target="_blank">${shortUrl}</a></td>
-          <td>${longUrl}</td>
-        `;
-
-            // ========== insert_before_hostname... ==========
-            const cssHostname = /* css */ `
-  .shortUrl_td::before {
-    content: "${window.location.hostname}/";
-
-  }
-
-`;
-            const styleElement = document.createElement("style");
-            styleElement.innerHTML = cssHostname;
-            document.head.appendChild(styleElement);
-
-            // ========== insert_before_hostname. ==========
-
-            tableBody.appendChild(row);
-          });
+        if (username === user && password === pass) {
+          localStorage.setItem("isAuthenticated", "true");
+          window.location.reload();
+        } else {
+          alert("Invalid username or password");
         }
+      }
 
-        function sortTable(column) {
-          // Toggle the sort direction if clicking on the same column
-          if (column === currentSortColumn) {
-            sortDirection = sortDirection === "asc" ? "desc" : "asc";
-          } else {
-            // Reset the sort direction if clicking on a different column
-            currentSortColumn = column;
-            sortDirection = "asc";
-          }
+      // Function to handle logout
+      function logout() {
+        localStorage.removeItem("isAuthenticated");
+        window.location.reload();
+      }
 
-          fetchData(); // Refresh the table after sorting
-        }
+      // Function to shorten a URL
+      async function createShortenUrl(event) {
+        event.preventDefault();
 
-        // Sort the data based on the specified column and direction
-        function sortData(data, column, direction) {
-          return Object.entries(data)
-            .sort((a, b) => {
-              const aValue = column === "shortUrl" ? a[0] : a[1][column];
-              const bValue = column === "shortUrl" ? b[0] : b[1][column];
+        const originalUrl = document.getElementById("originalUrl").value;
+        const shortUrl = document.getElementById("shortUrl").value;
 
-              if (direction === "asc") {
-                return aValue > bValue ? 1 : -1;
-              } else {
-                return aValue < bValue ? 1 : -1;
-              }
-            })
-            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
-        }
-
-        async function resetVisits() {
-          try {
-            const response = await fetch("/reset-visits", { method: "POST" });
-            if (response.ok) {
-              console.log("All visit counts reset to 0.");
-              fetchData(); // Refresh the table after resetting visits
-            } else {
-              console.error("Failed to reset visit counts.");
-            }
-          } catch (error) {
-            console.error("Error resetting visit counts:", error);
-          }
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-          fetchData();
+        const response = await fetch("/shorten", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ originalUrl, shortUrl }),
         });
 
-        // Toggle the visibility of the button
-        // function toggleButtonVisibility() {
-        //   const button = document.getElementById("resetButton");
-        //   button.style.display = button.style.display === "none" ? "block" : "none";
-        // }
-      </script>
-    </main>
+        const data = await response.json();
+        if (response.ok) {
+          alert(`Shortened URL: ${data.shortUrl}`);
+          getAllUrls();
+        } else {
+          alert(`Error: ${data.message}`);
+        }
+      }
+
+      // Function to fetch and display all shortened URLs
+      async function getAllUrls() {
+        const response = await fetch("/shortener");
+        const data = await response.json();
+
+        const urlsList = document.getElementById("urlsList");
+        urlsList.innerHTML = ""; // Clear the current list
+
+        if (data.length === 0) {
+          urlsList.innerHTML = "<p>No URLs found.</p>";
+        } else {
+          // Sort the URLs by visit count (descending by default)
+          data.sort((b, a) => (sortOrder[2] ? b.visitCount - a.visitCount : a.visitCount - b.visitCount));
+
+          data.forEach((url) => {
+            const listItem = document.createElement("tr");
+            listItem.innerHTML = `
+            
+                <td>${url.visitCount}</td>
+                <td><a href="/${url.shortUrl}" target="_blank">${url.shortUrl}</a></td>
+                <td class="action-btns">
+                  <button onclick="openUpdateModal('${url._id}', '${url.originalUrl}', '${url.shortUrl}')" class="btn-update"><i class="icon-pencil"></i></button>
+                  <button onclick="deleteUrl('${url._id}')" class="btn-delete"><i class="icon-trash"></i></button>
+                </td>
+                <td>${url._id}</td>
+                <td><a href="${url.originalUrl}" target="_blank">${sortUrl(url.originalUrl)}</a></td>
+            `;
+            urlsList.appendChild(listItem);
+          });
+        }
+      }
+
+      // Function to delete a URL
+      async function deleteUrl(urlId) {
+        // Show confirmation alert
+        const confirmation = confirm("Are you sure you want to delete this URL?");
+
+        if (!confirmation) {
+          return; // Exit the function if the user clicks "Cancel"
+        }
+
+        const response = await fetch(`/${urlId}`, {
+          method: "DELETE",
+        });
+
+        if (response.ok) {
+          alert("URL deleted successfully!");
+          getAllUrls(); // Refresh the list after deletion
+        } else {
+          alert("Error deleting URL");
+        }
+      }
+
+      // // Function to update a URL
+      // function updateUrl(urlId, currentOriginalUrl, currentShortUrl) {
+      //   const newOriginalUrl = prompt("Enter the new original URL:", currentOriginalUrl);
+      //   const newShortUrl = prompt("Enter the new custom short URL:", currentShortUrl);
+
+      //   if (newOriginalUrl && newShortUrl) {
+      //     fetch(`/${urlId}`, {
+      //       method: "PUT",
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //       },
+      //       body: JSON.stringify({
+      //         originalUrl: newOriginalUrl,
+      //         shortUrl: newShortUrl,
+      //       }),
+      //     })
+      //       .then((response) => response.json())
+      //       .then((data) => {
+      //         if (data && data.shortUrl) {
+      //           alert("URL updated successfully!");
+      //           getAllUrls(); // Refresh the list after updating
+      //         } else {
+      //           alert("Error updating URL");
+      //         }
+      //       });
+      //   }
+      // }
+
+      async function updateUrl(event) {
+        event.preventDefault();
+        const urlId = document.getElementById("updateUrlId").value;
+        const originalUrl = document.getElementById("updateOriginalUrl").value;
+        const shortUrl = document.getElementById("updateShortUrl").value;
+
+        try {
+          const response = await fetch(`/${urlId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ originalUrl, shortUrl }),
+          });
+
+          if (response.ok) {
+            alert("URL updated successfully!");
+            closeUpdateModal();
+            getAllUrls(); // Refresh the table
+          } else {
+            const errorData = await response.json();
+            alert("Error updating URL: " + (errorData.error || "Unknown error"));
+          }
+        } catch (error) {
+          console.error("Error updating URL:", error);
+          alert("Error updating URL: Check console for details.");
+        }
+      }
+
+      const sortUrl = (data) => {
+        return data.length > 30 ? data.slice(0, 30) + "..." : data;
+      };
+
+      // Sorting function for table columns
+      function sortTable1(columnIndex) {
+        sortOrder[columnIndex] = !sortOrder[columnIndex];
+        getAllUrls(); // Re-fetch and display sorted URLs
+      }
+
+      function sortTable(columnIndex) {
+        const table = document.getElementById("urlsTable");
+        const rows = Array.from(table.rows).slice(1); // Skip the header row
+        const isNumeric = columnIndex === 2; // For "Visit", ensure numeric comparison
+
+        rows.sort((rowA, rowB) => {
+          const cellA = rowA.cells[columnIndex].innerText.trim();
+          const cellB = rowB.cells[columnIndex].innerText.trim();
+
+          // If the column is numeric (Visit column), parse the numbers for sorting
+          if (isNumeric) {
+            return (parseInt(cellA) - parseInt(cellB)) * (sortOrder[columnIndex] ? 1 : -1);
+          } else {
+            return cellA.localeCompare(cellB) * (sortOrder[columnIndex] ? 1 : -1);
+          }
+        });
+
+        // Toggle sort order for the next click
+        sortOrder[columnIndex] = !sortOrder[columnIndex];
+
+        // Rebuild the table body with sorted rows
+        const tbody = table.getElementsByTagName("tbody")[0];
+        tbody.innerHTML = "";
+        rows.forEach((row) => tbody.appendChild(row));
+      }
+
+      // Function to reset visit counts
+      async function resetVisitCounts() {
+        if (!confirm("Are you sure you want to reset visit counts for all URLs?")) {
+          return;
+        }
+        try {
+          const response = await fetch("http://localhost:3000/reset-visit-count", {
+            method: "POST",
+          });
+          if (response.ok) {
+            alert("Visit counts have been reset for all URLs!");
+            getAllUrls(); // Refresh the list to show updated counts
+          } else {
+            const errorData = await response.json();
+            alert("Error resetting visit counts: " + (errorData.error || "Unknown error"));
+          }
+        } catch (error) {
+          console.error("Error resetting visit counts:", error);
+          alert("Error resetting visit counts: Check console for details.");
+        }
+      }
+
+      function openUpdateModal(urlId, originalUrl, shortUrl) {
+        document.getElementById("updateModal").style.display = "block";
+        document.getElementById("updateUrlId").value = urlId;
+        document.getElementById("updateOriginalUrl").value = originalUrl;
+        document.getElementById("updateShortUrl").value = shortUrl;
+      }
+      function closeUpdateModal() {
+        document.getElementById("updateModal").style.display = "none";
+      }
+    </script>
   </body>
 </html>

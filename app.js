@@ -29,11 +29,9 @@ startServer();
 // Configurar WebSocket
 setupWebSocketServer(server);
 
-mainApp.use("/", express.static("public"));
-
 const apiRouter = express.Router();
 
-apiRouter.use("/note", require("./modules/note/"));
+apiRouter.use("/note", require("./api/note/"));
 mainApp.use("/api", apiRouter);
 
 mainApp.use("/contact", require("./modules/contact/app.js"));
@@ -43,4 +41,7 @@ mainApp.use("/feed", require("./modules/feed/app.js"));
 mainApp.use("/chat", require("./modules/websocket/chatRoutes"));
 mainApp.use("/stat", require("./modules/stat/app.js"));
 mainApp.use("/notepad", require("./modules/notepad/app.js"));
-mainApp.use("/", require("./modules/shortener/app.js"));
+mainApp.use("/", require("./api/shortener/"));
+
+// mainApp.use("/", require("./modules/shortener/app.js"));
+mainApp.use("/", express.static("public"));

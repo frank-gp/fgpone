@@ -29,9 +29,61 @@
 
       <section id="output"></section>
     </main>
-    <footer></footer>
+    <footer>
+      <p id="name"></p>
+    </footer>
+    <!-- <script src="/components/auth.js"></script> -->
 
     <script>
+      var authUser = JSON.parse(localStorage.getItem("authUser"));
+      if (authUser) {
+        document.querySelector("#name").textContent = "by " + authUser.name;
+      }
+
+      // ========== Limit Cookies... ==========
+      function setCookie(name, value, minutes) {
+        const expires = new Date(Date.now() + minutes * 60 * 1000).toUTCString();
+        document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+      }
+
+      function getCookie(name) {
+        const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+          const [key, val] = cookie.split("=");
+          acc[key] = val;
+          return acc;
+        }, {});
+        return cookies[name] || null;
+      }
+
+      let limit = 0;
+
+      function count() {
+        let limitCount = parseInt(getCookie("limitCount")) || 0;
+        limitCount++;
+
+        if (limitCount > 2) {
+          document.body.innerHTML = `
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        height: 100vh;
+        font-size: 5vw;
+      }
+    </style>
+    <p>Too many attempts.</p>
+    <p>Please wait 30 minutes.</p>
+    <p>You are  <a href="/login">logged in!</a>.</p>`;
+          return;
+        }
+
+        setCookie("limitCount", limitCount, 30); // Guarda el nuevo límite con una expiración de 5 minutos
+      }
+
+      // ========== Limit Cookies. ==========
+
       const escapeHtml = (unsafe) => {
         return unsafe.replace(/[&<>"']/g, (match) => {
           const escapeMap = {
@@ -64,6 +116,7 @@
       };
 
       const createNote = async (noteData) => {
+        count();
         try {
           const response = await fetch("/api/note", {
             method: "POST",
@@ -99,6 +152,5 @@
         createNote(noteData);
       });
     </script>
-    <link rel="preload" href="https://frankgp.com/lib/highlight.js" as="script" />
   </body>
 </html>

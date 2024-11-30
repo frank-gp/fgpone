@@ -1,3 +1,5 @@
+@token=Bearer
+
 # GET http://localhost:3000/api/note/backup
 
 
@@ -30,12 +32,13 @@ GET http://localhost:3000/api/note/search/2411
 Content-Type: application/json
 
 ###
-GET http://localhost:3000/api/note/241129205355
+GET http://localhost:3000/api/note/241201101045
 Content-Type: application/json
 
 ###
-PUT http://localhost:3000/api/note/241129205355
+PUT http://localhost:3000/api/note/241201101045
 Content-Type: application/json
+Authorization: {{token}}
 
 {
   "title": "Nota Actualizada",
@@ -43,12 +46,14 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3000/api/note/241129205355
+DELETE http://localhost:3000/api/note/241201101045
 Content-Type: application/json
+Authorization: {{token}}
 
 ###
 DELETE http://localhost:3000/api/note/delete-all
 Content-Type: application/json
+Authorization: {{token}}
 
 
 
@@ -57,13 +62,17 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/api/note/backup
+Authorization: {{token}}
 
 ###
-POST http://localhost:3000/api/note/restore/backup-notes-241130021016.json
+POST http://localhost:3000/api/note/restore/backup-notes-241201095935.json
+Authorization: {{token}}
 
 ###
 GET http://localhost:3000/api/note/backups-list
+Authorization: {{token}}
 
 ###
-DELETE http://localhost:3000/api/note/backup/backup-notes-241130021016.json
+DELETE http://localhost:3000/api/note/backup/backup-notes-241201095935.json
+Authorization: {{token}}
 

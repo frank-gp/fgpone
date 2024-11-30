@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <title>Dashboard</title>
+
+  </head>
+  <body>
+    <header></header>
+    <main class="container">
+      <section>
+        <h2>Welcome to the Dashboard</h2>
+        <pre id="output"></pre>
+        <a role="button" href="/">Shortener</a>
+        <br>
+        <hr>
+        <a role="button" href="/note">Note</a>
+        <a role="button" href="/note/add">note/add</a>
+        <a role="button" href="/note/update">note/update</a>
+        <br>
+        <hr>
+        <a role="button" href="/db">db</a>
+        
+      </section>
+    </main>
+
+    <footer></footer>
+    <script src="../components/auth.js"></script>
+    <script>
+      async function fetchUsers() {
+        var authToken = localStorage.getItem("authToken");
+
+        if (!authToken) {
+          // window.location.href = "/login"; // Redirect to login if no token
+        }
+
+        try {
+          const response = await fetch("/api/auth/findAll", {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + authToken,
+            },
+          });
+
+          if (!response.ok) {
+            const errorDetails = await response.json();
+            throw new Error(`Failed to fetch users: ${errorDetails.message || "Unknown error"}`);
+          }
+
+          const users = await response.json();
+
+          const outputPre = document.getElementById("output");
+          outputPre.innerHTML = JSON.stringify(users, null, 2);
+        } catch (error) {
+          responseDiv.style.display = "block";
+          responseDiv.innerHTML = `Error: ${error.message}`;
+        }
+      }
+
+      fetchUsers();
+    </script>
+  </body>
+</html>

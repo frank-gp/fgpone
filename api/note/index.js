@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
+const verifyToken = require("../utils/verifyToken");
+
 // const upload = multer({ dest: "uploads/" }); // Carpeta temporal para subir archivos
 
 const notepadRouter = express.Router();
@@ -54,7 +56,7 @@ notepadRouter.get("/search/:query", async (req, res) => {
   }
 });
 
-notepadRouter.get("/backups-list", (req, res) => {
+notepadRouter.get("/backups-list", verifyToken, (req, res) => {
   const backupDir = path.resolve(__dirname, "backups"); // Asegúrate de que esta sea la ruta correcta
 
   // Verificar si el directorio de respaldos existe
@@ -81,7 +83,7 @@ notepadRouter.get("/backups-list", (req, res) => {
   });
 });
 
-notepadRouter.get("/backup", async (req, res) => {
+notepadRouter.get("/backup", verifyToken, async (req, res) => {
   try {
     const notes = await NoteModel.find().sort({ _id: -1 });
     // const backupPath = `backup-notes-${new Date().toISOString()}.json`;
@@ -143,7 +145,7 @@ notepadRouter.post("/", async (req, res) => {
   }
 });
 
-notepadRouter.post("/restore/multer", upload.single("backup"), async (req, res) => {
+notepadRouter.post("/restore/multer", verifyToken, upload.single("backup"), async (req, res) => {
   try {
     const backupPath = req.file.path; // Ruta temporal del archivo subido
     console.log("req.file", req.file);
@@ -168,7 +170,7 @@ notepadRouter.post("/restore/multer", upload.single("backup"), async (req, res) 
   }
 });
 
-notepadRouter.post("/restore/:fileName", async (req, res) => {
+notepadRouter.post("/restore/:fileName", verifyToken, async (req, res) => {
   try {
     const { fileName } = req.params;
 
@@ -198,7 +200,7 @@ notepadRouter.post("/restore/:fileName", async (req, res) => {
 });
 
 // Actualizar una nota por ID
-notepadRouter.put("/:id", async (req, res) => {
+notepadRouter.put("/:id", verifyToken, async (req, res) => {
   try {
     const { title, content } = req.body;
     const updatedNote = await NoteModel.findByIdAndUpdate(req.params.id, { title, content }, { new: true, runValidators: true });
@@ -212,7 +214,7 @@ notepadRouter.put("/:id", async (req, res) => {
 });
 
 // Eliminar todas las notas
-notepadRouter.delete("/delete-all", async (req, res) => {
+notepadRouter.delete("/delete-all", verifyToken, async (req, res) => {
   console.log("delete-all");
   try {
     const result = await NoteModel.deleteMany({});
@@ -222,7 +224,7 @@ notepadRouter.delete("/delete-all", async (req, res) => {
   }
 });
 
-notepadRouter.delete("/backup/:filename", (req, res) => {
+notepadRouter.delete("/backup/:filename", verifyToken, (req, res) => {
   const { filename } = req.params; // Obtener el nombre del archivo desde la URL
   const backupPath = path.join(__dirname, "backups", filename); // Construir la ruta completa del archivo
 
@@ -244,7 +246,7 @@ notepadRouter.delete("/backup/:filename", (req, res) => {
 });
 
 // Eliminar una nota por ID
-notepadRouter.delete("/:id", async (req, res) => {
+notepadRouter.delete("/:id", verifyToken, async (req, res) => {
   try {
     const deletedNote = await NoteModel.findByIdAndDelete(req.params.id);
     if (!deletedNote) {

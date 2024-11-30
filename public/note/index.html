@@ -13,7 +13,7 @@
       <header></header>
       <main class="container">
         <h1>
-          <a href="./">Note</a>
+          <a href="./">Note <span id="name"></span></a>
         </h1>
 
         <section id="output"></section>
@@ -23,6 +23,12 @@
       <script src="./component/layout.js"></script>
 
       <script>
+        var authUser = JSON.parse(localStorage.getItem("authUser"));
+
+        if (authUser) {
+          document.querySelector("#name").textContent = "by " + authUser.name;
+        }
+
         let showDeleteButtons = false;
 
         // Función para hacer el fetch de todas las notas
@@ -65,9 +71,15 @@
           });
         };
 
-        // Función para eliminar una nota
         const deleteNote = async (noteId) => {
-          const userConfirmed = confirm(`Are you sure you want to delete the note with ID ${noteId}?`);
+          const authToken = localStorage.getItem("authToken");
+
+          if (!authToken) {
+            alert("Por favor, inicie sesión.");
+            return;
+          }
+
+          const userConfirmed = confirm(`¿Está seguro de que desea eliminar la nota con ID ${noteId}?`);
           if (!userConfirmed) return;
 
           try {
@@ -75,17 +87,20 @@
               method: "DELETE",
               headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${authToken}`,
               },
             });
 
             if (response.ok) {
-              alert(`Nota con ID ${noteId} eliminada`);
+              alert(`Nota con ID ${noteId} eliminada exitosamente.`);
               await apiNoteAll(); // Recargar las notas después de la eliminación
               await import("https://frankgp.com/lib/highlight.js");
             } else {
-              alert(`Error al eliminar la nota con ID ${noteId}`);
+              const errorData = await response.json();
+              alert(`Error al eliminar la nota: ${errorData.error || "Error desconocido."}`);
             }
           } catch (error) {
+            alert("Error al eliminar la nota. Verifique su conexión a Internet o inténtelo más tarde.");
             console.error("Error deleting note:", error);
           }
         };
@@ -114,22 +129,16 @@
                 <button class="copy-btn">Copy<span class="mobile_none"> code </span></button>
               </aside>
               <div class="code_container">
-                <aside class="line-numbers">
-                  <span></span>
-                  <!-- Line numbers will be generated here -->
-                </aside>
                 <aside class="code-editor">
                   <pre><code class="code">${escapeHtml(note.content)}</code></pre>
                 </aside>
               </div>
             </div>
           `;
-            // <pre><code class="code">${escapeHtml(note.content)}</code></pre>
 
             // Agregar el HTML de la nota al contenedor principal
             outputElement.innerHTML += noteHTML;
             copyCode();
-            updateLineNumbers();
           });
         };
 

@@ -93,8 +93,23 @@
   <body>
     <header></header>
     <main class="container">
+      <!-- Login Section -->
+      <!-- <section id="loginSection">
+        <h1>Login</h1>
+        <form onsubmit="login(event)">
+          <label for="username">Username:</label>
+          <input type="text" id="username" required /><br /><br />
+          <label for="password">Password:</label>
+          <input type="password" id="password" required /><br /><br />
+          <button type="submit">Login</button>
+        </form>
+      </section> -->
+
+      <!-- URL Shortener Section (Visible after login) -->
       <section id="shortenerSection">
-        <h1>URL Shortener <span id="count_length"></span> <span id="name"></span></h1>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+
+        <h1>URL Shortener <span id="count_length"></span></h1>
         <form onsubmit="createShortenUrl(event)">
           <label for="originalUrl">Original URL:</label>
           <input type="url" id="originalUrl" required placeholder="https://www.example.com" /><br /><br />
@@ -108,9 +123,8 @@
         </form>
 
         <h2>All Shortened URLs</h2>
-        <a role="button" class="btn" href="/db" target="_blank">db</a>
-        <a role="button" class="btn" href="/logs" target="_blank">logs</a>
-        <a role="button" class="btn" href="/dashboard">dashboard</a>
+        <button><a class="btn" href="/db" target="_blank">db</a></button>
+        <!-- <button onclick="getAllUrls()">Get All URLs</button> -->
         <button onclick="resetVisitCounts()">Reset Visit Counts</button>
 
         <table id="urlsTable">
@@ -143,14 +157,8 @@
       </section>
     </main>
     <footer></footer>
-
     <script src="./components/auth.js"></script>
     <script>
-      var authUser = JSON.parse(localStorage.getItem("authUser"));
-      if (authUser) {
-        document.querySelector("#name").textContent = "by " + authUser.name;
-      }
-
       let sortOrder = {
         0: true, // Original URL (ascending by default)
         1: true, // Short URL (ascending by default)
@@ -158,33 +166,63 @@
         3: true, // Created At (ascending by default)
       };
 
+      // Check if user is already logged in
+      // window.onload = function () {
+      //   const isAuthenticated = localStorage.getItem("isAuthenticated");
+      //   if (isAuthenticated === "true") {
+      //     document.getElementById("loginSection").style.display = "none";
+      //     document.getElementById("shortenerSection").style.display = "block";
+      //     getAllUrls(); // Display the list of shortened URLs
+      //   } else {
+      //     document.getElementById("loginSection").style.display = "block";
+      //     document.getElementById("shortenerSection").style.display = "none";
+      //   }
+      // };
+
+      // // Function to handle login
+      // function login(event) {
+      //   event.preventDefault();
+      //   const username = document.getElementById("username").value;
+      //   const password = document.getElementById("password").value;
+
+      //   const user = atob("ZmdwNTU1");
+      //   const pass = atob("RWxlY3Ryb241LnBl");
+
+      //   if (username === user && password === pass) {
+      //     localStorage.setItem("isAuthenticated", "true");
+      //     window.location.reload();
+      //   } else {
+      //     alert("Invalid username or password");
+      //   }
+      // }
+
+      // // Function to handle logout
+      // function logout() {
+      //   localStorage.removeItem("isAuthenticated");
+      //   window.location.reload();
+      // }
+
+      // Function to shorten a URL
       async function createShortenUrl(event) {
         event.preventDefault();
 
         const originalUrl = document.getElementById("originalUrl").value;
         const shortUrl = document.getElementById("shortUrl").value;
 
-        try {
-          const response = await fetch("/create", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${authToken}`,
-            },
-            body: JSON.stringify({ originalUrl, shortUrl }),
-          });
+        const response = await fetch("/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ originalUrl, shortUrl }),
+        });
 
-          const data = await response.json();
-
-          if (response.ok) {
-            alert(`Shortened URL: ${data.shortUrl}`);
-            getAllUrls();
-          } else {
-            alert(`Error: ${data.error}`);
-          }
-        } catch (error) {
-          console.error("Request failed", error);
-          alert("Hubo un error al procesar tu solicitud.");
+        const data = await response.json();
+        if (response.ok) {
+          alert(`Shortened URL: ${data.shortUrl}`);
+          getAllUrls();
+        } else {
+          alert(`Error: ${data.message}`);
         }
       }
 
@@ -207,54 +245,19 @@
           data.forEach((url) => {
             const listItem = document.createElement("tr");
             listItem.innerHTML = `
-        <td>${url.visitCount}</td>
-        <td><a href="/${url.shortUrl}" target="_blank">${url.shortUrl}</a></td>
-        <td class="action-btns">
-          <button onclick="copyToClipboard('${url.shortUrl}')" class="btn-copy"><i class="icon-copy"></i></button> <!-- Copy URL button -->
-          <button onclick="openUpdateModal('${url._id}', '${url.originalUrl}', '${url.shortUrl}')" class="btn-update"><i class="icon-pencil"></i></button>
-          <button onclick="deleteUrl('${url._id}')" class="btn-delete"><i class="icon-trash"></i></button>
-        </td>
-        <td>${url._id}</td>
-        <td><a href="${url.originalUrl}" target="_blank">${sortUrl(url.originalUrl)}</a></td>
-      `;
+            
+                <td>${url.visitCount}</td>
+                <td><a href="/${url.shortUrl}" target="_blank">${url.shortUrl}</a></td>
+                <td class="action-btns">
+                  <button onclick="openUpdateModal('${url._id}', '${url.originalUrl}', '${url.shortUrl}')" class="btn-update"><i class="icon-pencil"></i></button>
+                  <button onclick="deleteUrl('${url._id}')" class="btn-delete"><i class="icon-trash"></i></button>
+                </td>
+                <td>${url._id}</td>
+                <td><a href="${url.originalUrl}" target="_blank">${sortUrl(url.originalUrl)}</a></td>
+            `;
             urlsList.appendChild(listItem);
           });
         }
-      }
-
-      function copyToClipboard(shortUrl) {
-        // Crear un input temporal para copiar el URL
-        const tempInput = document.createElement("input");
-        const shortUrlDomain = `https://fgp.one/${shortUrl}`;
-        tempInput.value = shortUrlDomain; // Reemplaza con tu dominio
-        document.body.appendChild(tempInput);
-
-        // Seleccionar el texto y copiarlo al portapapeles
-        tempInput.select();
-        document.execCommand("copy");
-
-        // Eliminar el input temporal
-        document.body.removeChild(tempInput);
-
-        // Crear un mensaje de alerta temporal con template literals
-        const alertMessage = document.createElement("div");
-        alertMessage.innerHTML = `URL <strong>${shortUrlDomain}</strong> copied to clipboard!`;
-        alertMessage.style.position = "fixed";
-        alertMessage.style.bottom = "20px";
-        alertMessage.style.left = "50%";
-        alertMessage.style.transform = "translateX(-50%)";
-        alertMessage.style.backgroundColor = "indigo";
-        alertMessage.style.color = "white";
-        alertMessage.style.padding = "10px 20px";
-        alertMessage.style.borderRadius = "5px";
-        alertMessage.style.fontSize = "16px";
-        alertMessage.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
-        document.body.appendChild(alertMessage);
-
-        // Eliminar el mensaje de alerta después de 3 segundos
-        setTimeout(() => {
-          alertMessage.remove();
-        }, 3000); // 3000 ms = 3 segundos
       }
 
       var authToken = localStorage.getItem("authToken");
@@ -276,9 +279,6 @@
 
         const response = await fetch(`/remove/${urlId}`, {
           method: "DELETE",
-          headers: {
-            Authorization: "Bearer " + authToken,
-          },
         });
 
         if (response.ok) {
@@ -289,6 +289,34 @@
         }
       }
 
+      // // Function to update a URL
+      // function updateUrl(urlId, currentOriginalUrl, currentShortUrl) {
+      //   const newOriginalUrl = prompt("Enter the new original URL:", currentOriginalUrl);
+      //   const newShortUrl = prompt("Enter the new custom short URL:", currentShortUrl);
+
+      //   if (newOriginalUrl && newShortUrl) {
+      //     fetch(`/${urlId}`, {
+      //       method: "PUT",
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //       },
+      //       body: JSON.stringify({
+      //         originalUrl: newOriginalUrl,
+      //         shortUrl: newShortUrl,
+      //       }),
+      //     })
+      //       .then((response) => response.json())
+      //       .then((data) => {
+      //         if (data && data.shortUrl) {
+      //           alert("URL updated successfully!");
+      //           getAllUrls(); // Refresh the list after updating
+      //         } else {
+      //           alert("Error updating URL");
+      //         }
+      //       });
+      //   }
+      // }
+
       async function updateUrl(event) {
         event.preventDefault();
         const urlId = document.getElementById("updateUrlId").value;
@@ -298,7 +326,7 @@
         try {
           const response = await fetch(`/update/${urlId}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json", Authorization: "Bearer " + authToken },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ originalUrl, shortUrl }),
           });
 
@@ -360,7 +388,6 @@
         try {
           const response = await fetch("/reset_visit_count", {
             method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: "Bearer " + authToken },
           });
           if (response.ok) {
             alert("Visit counts have been reset for all URLs!");

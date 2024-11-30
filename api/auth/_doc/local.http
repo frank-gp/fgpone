@@ -1,0 +1,85 @@
+@token=Bearer 
+
+###
+POST http://localhost:3000/api/auth/create
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "name": "User",
+  "email": "demo@gmail.com",
+  "username": "fgp555",
+  "password": "P4s5W0rD@123",
+  "role": "admin"
+}
+
+###
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "user123",
+  "password": "securepassword123"
+}
+
+###
+GET http://localhost:3000/api/auth/findAll
+Authorization: {{token}}
+
+###
+GET http://localhost:3000/api/auth/findOne/241130234111
+Authorization: {{token}}
+
+###
+GET http://localhost:3000/api/auth/search?query=2411
+Authorization: {{token}}
+
+###
+PUT http://localhost:3000/api/auth/update/241130234111
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "email": "update@example.com",
+  "username": "user123",
+  "password": "securepassword123",
+  "role": "user"
+}
+
+###
+DELETE http://localhost:3000/api/auth/remove/241130234111
+Authorization: {{token}}
+
+###
+DELETE http://localhost:3000/api/auth/deleteMany
+Authorization: {{token}}
+
+###
+GET http://localhost:3000/api/auth/findOneEmail/user@example.com
+Authorization: {{token}}
+
+
+
+### ==========        ==========
+### ========== backup ==========
+### ==========        ==========
+
+### POST http://localhost:3000/api/auth/backup_restore_upload
+### GET http://localhost:3000/api/auth/download/backup-1-shorts-241130230827.json
+
+###
+POST http://localhost:3000/api/auth/backup_create
+Authorization: {{token}}
+
+###
+POST http://localhost:3000/api/auth/backup_list
+Authorization: {{token}}
+
+###
+POST http://localhost:3000/api/auth/backup_restore/backup-1-shorts-241130230827.json
+Authorization: {{token}}
+
+###
+DELETE http://localhost:3000/api/auth/backup_delete/backup-1-shorts-241130230827.json
+Authorization: {{token}}
+

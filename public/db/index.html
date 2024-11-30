@@ -22,22 +22,9 @@
   </head>
   <body>
     <main class="container">
-      <!-- Login Section -->
-      <section id="loginSection">
-        <h1>Login</h1>
-        <form id="loginForm" onsubmit="handleLogin(event)">
-          <label for="username">Username:</label>
-          <input type="text" id="username" required />
-          <label for="password">Password:</label>
-          <input type="password" id="password" required />
-          <button type="submit" class="button">Login</button>
-        </form>
-        <p id="loginError" style="color: crimson; display: none">Invalid username or password</p>
-      </section>
-
       <!-- Backup Management Section -->
-      <section id="backupSection" style="display: none">
-        <h1>Backup Management</h1>
+      <section id="backupSection">
+        <h1>Backup Management <span id="name"></span></h1>
 
         <h2>Create Backup</h2>
         <button class="button" onclick="createBackup()">Create Backup</button>
@@ -49,46 +36,22 @@
       </section>
     </main>
 
+    <script src="/components/auth.js"></script>
+
     <script>
+      document.querySelector("#name").textContent = "by " + authUser.name;
+      var authToken = localStorage.getItem("authToken");
+
       const baseUrl = "";
-
-      const username = atob("ZmdwNTU1");
-      const password = atob("RWxlY3Ryb241LnBl");
-
-      // Simulated credentials
-      const credentials = { username, password };
-
-      // Check if user is already logged in
-      window.onload = function () {
-        const isAuthenticated = localStorage.getItem("isAuthenticated");
-        if (isAuthenticated === "true") {
-          document.getElementById("loginSection").style.display = "none";
-          document.getElementById("backupSection").style.display = "block";
-          listBackups(); // Display the list of shortened URLs
-        } else {
-          document.getElementById("loginSection").style.display = "block";
-          document.getElementById("backupSection").style.display = "none";
-        }
-      };
-
-      // Handle Login
-      function handleLogin(event) {
-        event.preventDefault();
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-
-        if (username === credentials.username && password === credentials.password) {
-          localStorage.setItem("isAuthenticated", "true");
-          window.location.reload();
-        } else {
-          document.getElementById("loginError").style.display = "block";
-        }
-      }
 
       async function createBackup() {
         try {
-          const response = await fetch(`${baseUrl}/backup_create`, {
+          const response = await fetch(`${baseUrl}/private/backup_create`, {
             method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
           });
           const result = await response.json();
           document.getElementById("createBackupOutput").textContent = JSON.stringify(result, null, 2);
@@ -100,8 +63,12 @@
 
       async function listBackups() {
         try {
-          const response = await fetch(`${baseUrl}/backup_list`, {
+          const response = await fetch(`${baseUrl}/private/backup_list`, {
             method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
           });
           const result = await response.json();
           console.log("API response:", result); // Debugging line
@@ -124,7 +91,9 @@
                   <button class="button-danger" onclick="deleteBackup('${fileName}')">Delete</button>
                   <strong>${fileName}</strong>
                 </section>
-                `).join("");
+                `
+            )
+            .join("");
 
           document.getElementById("listBackupsOutput").innerHTML = backupHtml;
         } catch (error) {
@@ -137,8 +106,12 @@
         if (!confirm("Are you sure you want to restore this backup?")) return;
 
         try {
-          const response = await fetch(`${baseUrl}/backup_restore/${backupFileName}`, {
+          const response = await fetch(`${baseUrl}/private/backup_restore/${backupFileName}`, {
             method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
           });
           const result = await response.text();
           alert(result || "Backup restored successfully.");
@@ -151,8 +124,12 @@
         if (!confirm("Are you sure you want to delete this backup?")) return;
 
         try {
-          const response = await fetch(`${baseUrl}/backup_delete/${backupFileName}`, {
+          const response = await fetch(`${baseUrl}/private/backup_delete/${backupFileName}`, {
             method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
           });
           const result = await response.text();
           alert(result || "Backup deleted successfully.");
@@ -164,16 +141,37 @@
 
       async function downloadBackup(backupFileName) {
         try {
+          const response = await fetch(`${baseUrl}/private/download/${backupFileName}`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          // Convert the response to a Blob for download
+          const blob = await response.blob();
+
+          // Create a link and trigger the download
           const link = document.createElement("a");
-          link.href = `${baseUrl}/download/${backupFileName}`;
+          link.href = URL.createObjectURL(blob);
           link.download = backupFileName;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
+
+          // Clean up the object URL
+          URL.revokeObjectURL(link.href);
         } catch (error) {
-          alert("Error downloading backup: " + error);
+          alert("Error downloading backup: " + error.message);
+          console.error("Error:", error);
         }
       }
+
+      listBackups();
     </script>
   </body>
 </html>

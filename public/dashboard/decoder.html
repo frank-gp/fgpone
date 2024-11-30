@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Decodificar JWT</title>
+  </head>
+  <body>
+    <h2>Payload del JWT Decodificado</h2>
+    <pre id="decoded"></pre>
+
+    <script>
+      // Función para decodificar JWT manualmente
+      function decodeJWT(token) {
+        // Separar el JWT en sus tres partes: header, payload y signature
+        const [header, payload, signature] = token.split(".");
+
+        // Decodificar las partes header y payload de Base64 URL a Base64 normal
+        const decodedHeader = JSON.parse(atob(header.replace(/_/g, "/").replace(/-/g, "+")));
+        const decodedPayload = JSON.parse(atob(payload.replace(/_/g, "/").replace(/-/g, "+")));
+
+        return { header: decodedHeader, payload: decodedPayload };
+      }
+
+      // JWT que deseas decodificar (reemplázalo con tu JWT)
+      const token =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiIyNDEyMDEwMDU1NDQiLCJ1c2VybmFtZSI6InVzZXIxMjMiLCJyb2xlIjoidXNlciIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTczMzAxNDc1OSwiZXhwIjoxNzMzODc4NzU5fQ.zDoxUUxM4DoJ_TnSN9G0JRtA7AnsAVoOzfsjo4-E_UU"; // Reemplaza esto con tu token JWT
+
+      try {
+        // Decodificar el JWT
+        const decoded = decodeJWT(token);
+
+        // Mostrar el payload decodificado en la página
+        document.getElementById("decoded").textContent = JSON.stringify(decoded.payload, null, 2);
+      } catch (e) {
+        // Si ocurre un error (por ejemplo, token inválido), mostrar mensaje
+        document.getElementById("decoded").textContent = "Token JWT no válido";
+      }
+    </script>
+  </body>
+</html>

@@ -3,12 +3,14 @@ const connectMongoDB = require("./config/mongodb");
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
+const morgan = require("morgan");
 
 require("dotenv").config();
 
 const mainApp = express();
 const server = http.createServer(mainApp);
 
+mainApp.use(morgan("dev"));
 mainApp.use(cors());
 mainApp.use(express.json());
 mainApp.use(express.urlencoded({ extended: true }));
@@ -41,7 +43,13 @@ mainApp.use("/feed", require("./modules/feed/app.js"));
 mainApp.use("/chat", require("./modules/websocket/chatRoutes"));
 mainApp.use("/stat", require("./modules/stat/app.js"));
 mainApp.use("/notepad", require("./modules/notepad/app.js"));
-mainApp.use("/", require("./api/shortener/"));
-
+mainApp.use("/", require("./api/shortener/shortener.router.js"));
+// shortener.router.js
 // mainApp.use("/", require("./modules/shortener/app.js"));
 mainApp.use("/", express.static("public"));
+
+
+// Catch-all route for 404 (Not Found) errors
+mainApp.use((req, res, next) => {
+  res.status(404).sendFile("404.html", { root: "public" });
+});

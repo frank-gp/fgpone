@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <title>Backup CRUD Operations</title>
+    <style>
+      section {
+        max-width: 50rem;
+        margin: auto;
+      }
+      button {
+        margin: 0;
+        padding: 0.2em 0.5em;
+      }
+      .button-danger {
+        background-color: crimson;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <!-- Login Section -->
+      <section id="loginSection">
+        <h1>Login</h1>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <label for="username">Username:</label>
+          <input type="text" id="username" required />
+          <label for="password">Password:</label>
+          <input type="password" id="password" required />
+          <button type="submit" class="button">Login</button>
+        </form>
+        <p id="loginError" style="color: crimson; display: none">Invalid username or password</p>
+      </section>
+
+      <!-- Backup Management Section -->
+      <section id="backupSection" style="display: none">
+        <h1>Backup Management</h1>
+
+        <h2>Create Backup</h2>
+        <button class="button" onclick="createBackup()">Create Backup</button>
+        <button class="button" onclick="listBackups()">listBackups</button>
+        <pre id="createBackupOutput" class="output"></pre>
+
+        <h2>List Backups</h2>
+        <div id="listBackupsOutput" class="output"></div>
+      </section>
+    </main>
+
+    <script>
+      const baseUrl = "";
+
+      const username = atob("ZmdwNTU1");
+      const password = atob("RWxlY3Ryb241LnBl");
+
+      // Simulated credentials
+      const credentials = { username, password };
+
+      // Check if user is already logged in
+      window.onload = function () {
+        const isAuthenticated = localStorage.getItem("isAuthenticated");
+        if (isAuthenticated === "true") {
+          document.getElementById("loginSection").style.display = "none";
+          document.getElementById("backupSection").style.display = "block";
+          listBackups(); // Display the list of shortened URLs
+        } else {
+          document.getElementById("loginSection").style.display = "block";
+          document.getElementById("backupSection").style.display = "none";
+        }
+      };
+
+      // Handle Login
+      function handleLogin(event) {
+        event.preventDefault();
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        if (username === credentials.username && password === credentials.password) {
+          localStorage.setItem("isAuthenticated", "true");
+          window.location.reload();
+        } else {
+          document.getElementById("loginError").style.display = "block";
+        }
+      }
+
+      async function createBackup() {
+        try {
+          const response = await fetch(`${baseUrl}/backup_create`, {
+            method: "POST",
+          });
+          const result = await response.json();
+          document.getElementById("createBackupOutput").textContent = JSON.stringify(result, null, 2);
+          listBackups();
+        } catch (error) {
+          document.getElementById("createBackupOutput").textContent = "Error creating backup: " + error;
+        }
+      }
+
+      async function listBackups() {
+        try {
+          const response = await fetch(`${baseUrl}/backup_list`, {
+            method: "POST",
+          });
+          const result = await response.json();
+          console.log("API response:", result); // Debugging line
+
+          // Safely retrieve backupFiles
+          const backupList = Array.isArray(result.backupFiles) ? result.backupFiles : [];
+
+          if (backupList.length === 0) {
+            document.getElementById("listBackupsOutput").textContent = "No backups available.";
+            return;
+          }
+
+          // Generate HTML for backups
+          const backupHtml = backupList
+            .map(
+              (fileName) => `
+                <section style="margin-bottom: 10px;">
+                  <button class="button" onclick="downloadBackup('${fileName}')">Download</button>
+                  <button class="button" onclick="restoreBackup('${fileName}')">Restore</button>
+                  <button class="button-danger" onclick="deleteBackup('${fileName}')">Delete</button>
+                  <strong>${fileName}</strong>
+                </section>
+                `).join("");
+
+          document.getElementById("listBackupsOutput").innerHTML = backupHtml;
+        } catch (error) {
+          console.error("Error listing backups:", error);
+          document.getElementById("listBackupsOutput").textContent = "Error listing backups: " + error.message;
+        }
+      }
+
+      async function restoreBackup(backupFileName) {
+        if (!confirm("Are you sure you want to restore this backup?")) return;
+
+        try {
+          const response = await fetch(`${baseUrl}/backup_restore/${backupFileName}`, {
+            method: "POST",
+          });
+          const result = await response.text();
+          alert(result || "Backup restored successfully.");
+        } catch (error) {
+          alert("Error restoring backup: " + error);
+        }
+      }
+
+      async function deleteBackup(backupFileName) {
+        if (!confirm("Are you sure you want to delete this backup?")) return;
+
+        try {
+          const response = await fetch(`${baseUrl}/backup_delete/${backupFileName}`, {
+            method: "DELETE",
+          });
+          const result = await response.text();
+          alert(result || "Backup deleted successfully.");
+          listBackups();
+        } catch (error) {
+          alert("Error deleting backup: " + error);
+        }
+      }
+
+      async function downloadBackup(backupFileName) {
+        try {
+          const link = document.createElement("a");
+          link.href = `${baseUrl}/download/${backupFileName}`;
+          link.download = backupFileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } catch (error) {
+          alert("Error downloading backup: " + error);
+        }
+      }
+    </script>
+  </body>
+</html>

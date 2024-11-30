@@ -81,6 +81,13 @@
           color: #000;
         }
       }
+      #count_length {
+        color: indianred;
+      }
+      a.btn {
+        text-decoration: none;
+        color: inherit;
+      }
     </style>
   </head>
   <body>
@@ -101,7 +108,8 @@
       <!-- URL Shortener Section (Visible after login) -->
       <section id="shortenerSection" style="display: none">
         <button class="btn-logout" onclick="logout()">Logout</button>
-        <h1>URL Shortener</h1>
+
+        <h1>URL Shortener <span id="count_length"></span></h1>
         <form onsubmit="createShortenUrl(event)">
           <label for="originalUrl">Original URL:</label>
           <input type="url" id="originalUrl" required placeholder="https://www.example.com" /><br /><br />
@@ -115,7 +123,8 @@
         </form>
 
         <h2>All Shortened URLs</h2>
-        <button onclick="getAllUrls()">Get All URLs</button>
+        <button><a class="btn" href="/db" target="_blank">db</a></button>
+        <!-- <button onclick="getAllUrls()">Get All URLs</button> -->
         <button onclick="resetVisitCounts()">Reset Visit Counts</button>
 
         <table id="urlsTable">
@@ -199,7 +208,7 @@
         const originalUrl = document.getElementById("originalUrl").value;
         const shortUrl = document.getElementById("shortUrl").value;
 
-        const response = await fetch("/shorten", {
+        const response = await fetch("/create", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -218,8 +227,10 @@
 
       // Function to fetch and display all shortened URLs
       async function getAllUrls() {
-        const response = await fetch("/shortener");
+        const response = await fetch("/findAll");
         const data = await response.json();
+
+        document.querySelector("#count_length").innerHTML = data.length;
 
         const urlsList = document.getElementById("urlsList");
         urlsList.innerHTML = ""; // Clear the current list
@@ -257,7 +268,7 @@
           return; // Exit the function if the user clicks "Cancel"
         }
 
-        const response = await fetch(`/${urlId}`, {
+        const response = await fetch(`/remove/${urlId}`, {
           method: "DELETE",
         });
 
@@ -304,7 +315,7 @@
         const shortUrl = document.getElementById("updateShortUrl").value;
 
         try {
-          const response = await fetch(`/${urlId}`, {
+          const response = await fetch(`/update/${urlId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ originalUrl, shortUrl }),
@@ -366,7 +377,7 @@
           return;
         }
         try {
-          const response = await fetch("http://localhost:3000/reset-visit-count", {
+          const response = await fetch("/reset_visit_count", {
             method: "POST",
           });
           if (response.ok) {

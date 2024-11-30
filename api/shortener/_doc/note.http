@@ -1,0 +1,69 @@
+# GET http://localhost:3000/api/shortener/backup
+
+
+###
+POST http://localhost:3000/api/shortener
+Content-Type: application/json
+
+{
+  "_id": "231129000000",
+  "title": "Primera Nota",
+  "content": "<meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Document</title>"
+}
+
+###
+POST http://localhost:3000/api/shortener
+Content-Type: application/json
+
+{
+  "title": "Primera Nota",
+  "content": "const startServer = async () => {\n  try {\n    await connectMongoDB();\n    server.listen(3000, () => {\n      console.log(`listening on http://localhost:3000/`);\n    });\n  } catch (error) {\n    console.error(\"Error starting the server:\", error);\n  }\n};"
+}
+
+
+###
+GET http://localhost:3000/api/shortener
+Content-Type: application/json
+
+###
+GET http://localhost:3000/api/shortener/search/2411
+Content-Type: application/json
+
+###
+GET http://localhost:3000/api/shortener/241129205355
+Content-Type: application/json
+
+###
+PUT http://localhost:3000/api/shortener/241129205355
+Content-Type: application/json
+
+{
+  "title": "Nota Actualizada",
+  "content": "Este es el contenido actualizado de la nota."
+}
+
+###
+DELETE http://localhost:3000/api/shortener/241129205355
+Content-Type: application/json
+
+###
+DELETE http://localhost:3000/api/shortener/delete-all
+Content-Type: application/json
+
+
+
+### ========== backups ==========
+### POST http://localhost:3000/api/shortener/restore/multer
+
+###
+GET http://localhost:3000/api/shortener/backup
+
+###
+POST http://localhost:3000/api/shortener/restore/backup-notes-241130021016.json
+
+###
+GET http://localhost:3000/api/shortener/backups-list
+
+###
+DELETE http://localhost:3000/api/shortener/backup/backup-notes-241130021016.json
+

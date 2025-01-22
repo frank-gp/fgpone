@@ -1,6 +1,8 @@
+@token=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiIyNTAxMjIxMjM0MjUiLCJ1c2VybmFtZSI6ImZncDU1NTIiLCJyb2xlIjoiYWRtaW4iLCJlbWFpbCI6ImRlbW9AZ21haWwuY29tIiwiaWF0IjoxNzM3NTQ5MjY5LCJleHAiOjE3Mzg0MTMyNjl9.0Uq9LbrZgj5xTFHxmcfIe3FWCW9CQeGrJM88YzSzqdg
 
 POST http://localhost:3000/create
 Content-Type: application/json
+Authorization: {{token}}
 
 {
   "originalUrl": "https://www.example.com",
@@ -36,16 +38,20 @@ Content-Type: application/json
 ### GET http://localhost:3000/download/backup-all.json
 
 ###
-POST http://localhost:3000/backup_create
+POST http://localhost:3000/private/backup_create
+Authorization: {{token}}
 
 ###
-POST http://localhost:3000/backup_list
+POST http://localhost:3000/private/backup_list
+Authorization: {{token}}
 
 ###
-POST http://localhost:3000/backup_restore/backup-all.json
+POST http://localhost:3000/private/backup_restore/backup-250122123449-Shortener-82.json
+Authorization: {{token}}
 
 ###
-DELETE http://localhost:3000/backup_delete/backup-all.json
+DELETE http://localhost:3000/private/backup_delete/backup-250122123449-Shortener-82.json
+Authorization: {{token}}
 
 
 

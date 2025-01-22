@@ -27,7 +27,9 @@ class DBController {
 
   async backup_create(req, res) {
     try {
-      const findAll = await AuthModel.find().sort({ _id: -1 });
+      // const findAll = await AuthModel.find().sort({ _id: -1 });
+      const findAll = await AuthModel.find().select("+password").sort({ _id: -1 });
+
       const documentCount = findAll.length; // Cantidad de documentos
       const newDate = new Date()
         .toISOString()
@@ -38,7 +40,7 @@ class DBController {
       // Acceder al nombre del modelo
       const modelName = AuthModel.modelName;
       const backupDir = path.resolve(__dirname, "backups"); // Carpeta "backups" dentro de tu proyecto
-      const backupPath = path.join(backupDir, `backup-${modelName}-${documentCount}-${newDate}.json`);
+      const backupPath = path.join(backupDir, `backup-${newDate}-${modelName}-${documentCount}.json`);
       // Asegúrate de que el directorio existe
       if (!fs.existsSync(backupDir)) {
         fs.mkdirSync(backupDir, { recursive: true });

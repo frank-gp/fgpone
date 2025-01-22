@@ -8,14 +8,20 @@
       <link rel="stylesheet" href="https://frank-gp.github.io/icon/icomoon/style.css" />
       <link rel="stylesheet" href="./component/layout.css?2024_11_30" />
       <title>Note</title>
+      <style>
+        h2 {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 1em;
+        }
+        .display-none {
+          display: none;
+        }
+      </style>
     </head>
     <body>
       <header></header>
       <main class="container">
-        <h1>
-          <a href="./">Note <span id="name"></span></a>
-        </h1>
-
         <section id="output"></section>
       </main>
       <footer></footer>
@@ -24,10 +30,6 @@
 
       <script>
         var authUser = JSON.parse(localStorage.getItem("authUser"));
-
-        if (authUser) {
-          document.querySelector("#name").textContent = "by " + authUser.name;
-        }
 
         let showDeleteButtons = false;
 
@@ -113,11 +115,11 @@
           notes.forEach((note) => {
             // Usamos template literals para construir el HTML
             const noteHTML = `
-            <div class="note display_data">
+            <div class="note display_data ">
               <h2 class="note_title">
                 <a href="/note/?${note._id}">${note.title}</a>
               </h2>
-              <aside class="note_head">
+              <aside class="note_head ">
                 <button class="display-none">
                   <a href="/note/add" target="_blank">Add</a>
                 </button>
@@ -125,8 +127,8 @@
                   <a href="/note/update?${note._id}" target="_blank">Edit</a>
                 </button>
                 <button class="display-none button-delete" onclick="deleteNote('${note._id}')">Delete</button>
-                <a href="/note/?${note._id}" target="_blank">${note._id}</a>
-                <button class="copy-btn">Copy<span class="mobile_none"> code </span></button>
+                <a href="/note/?${note._id}" class="display-none" target="_blank">${note._id}</a>
+                <button class="display-none copy-btn">Copy</button>
               </aside>
               <div class="code_container">
                 <aside class="code-editor">
@@ -144,7 +146,7 @@
 
         // Función para manejar la combinación de teclas Ctrl + Space
         const handleKeyDown = (event) => {
-          console.log("111");
+          console.log("handleKeyDown Space");
           // Verificar si Ctrl y Space están presionados
           if (event.ctrlKey && event.code === "Space") {
             console.log("Ctrl + Space presionados");

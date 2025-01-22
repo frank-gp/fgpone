@@ -1,4 +1,4 @@
-@token=Bearer
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiIyNDEyMDEwMTE1NDAiLCJ1c2VybmFtZSI6InVzZXIxMjMiLCJyb2xlIjoidXNlciIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTczNzUzMTU5NiwiZXhwIjoxNzM4Mzk1NTk2fQ.QTvD2lglVMpYS19ZR3fxEAa8fRmTHvpLqt2si43Toyw
 
 # GET http://localhost:3000/api/note/backup
 
@@ -8,7 +8,7 @@ POST http://localhost:3000/api/note
 Content-Type: application/json
 
 {
-  "_id": "231129000000",
+  "_id": "231129000001",
   "title": "Primera Nota",
   "content": "<meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Document</title>"
 }
@@ -32,28 +32,28 @@ GET http://localhost:3000/api/note/search/2411
 Content-Type: application/json
 
 ###
-GET http://localhost:3000/api/note/241201101045
+GET http://localhost:3000/api/note/250122073909
 Content-Type: application/json
 
 ###
-PUT http://localhost:3000/api/note/241201101045
+PUT http://localhost:3000/api/note/250122073909
 Content-Type: application/json
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 
 {
   "title": "Nota Actualizada",
-  "content": "Este es el contenido actualizado de la nota."
+  "content": "Este es el contenido actualizado de la nota. aaa"
 }
 
 ###
-DELETE http://localhost:3000/api/note/241201101045
+DELETE http://localhost:3000/api/note/250122073909
 Content-Type: application/json
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 
 ###
 DELETE http://localhost:3000/api/note/delete-all
 Content-Type: application/json
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 
 
 
@@ -62,17 +62,17 @@ Authorization: {{token}}
 
 ###
 GET http://localhost:3000/api/note/backup
-Authorization: {{token}}
-
-###
-POST http://localhost:3000/api/note/restore/backup-notes-241201095935.json
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 
 ###
 GET http://localhost:3000/api/note/backups-list
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 
 ###
-DELETE http://localhost:3000/api/note/backup/backup-notes-241201095935.json
-Authorization: {{token}}
+POST http://localhost:3000/api/note/restore/backup-notes-250122123528.json
+Authorization: Bearer {{token}}
+
+###
+DELETE http://localhost:3000/api/note/backup/backup-notes-250122123528.json
+Authorization: Bearer {{token}}
 

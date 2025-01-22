@@ -48,7 +48,7 @@ const customMorgan = morgan(":date :method :full-url :status :res[content] - :re
 
 mainApp.use(customMorgan);
 
-// mainApp.use(morgan("dev"));
+mainApp.use(morgan("dev"));
 mainApp.use(cors());
 mainApp.use(express.json());
 mainApp.use(express.urlencoded({ extended: true }));
@@ -77,18 +77,11 @@ mainApp.use("/api", apiRouter);
 
 mainApp.use("/contact", require("./modules/contact/app.js"));
 mainApp.use("/img", require("./modules/img/app.js"));
-mainApp.use("/feed", require("./modules/feed/app.js"));
 mainApp.use("/chat", require("./modules/websocket/chatRoutes"));
 mainApp.use("/stat", require("./modules/stat/app.js"));
-mainApp.use("/notepad", require("./modules/notepad/app.js"));
 mainApp.use("/", require("./api/shortener/shortener.router.js"));
 
 mainApp.use("/", express.static("public"));
-
-// // Endpoint para mostrar los logs
-// mainApp.get("/logs", (req, res) => {
-//   res.json(logArray); // Devuelve los logs almacenados
-// });
 
 mainApp.get("/logs", (req, res) => {
   const sortedLogs = logArray.slice().reverse(); // Copia el array y lo ordena en orden descendente

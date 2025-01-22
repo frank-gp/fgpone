@@ -37,6 +37,7 @@
         padding: 8px;
         text-align: left;
         border: 1px solid #ddd;
+        white-space: nowrap;
       }
       th {
         background-color: #f4f4f4;
@@ -118,8 +119,8 @@
             <tr>
               <th onclick="sortTable(2)">Visit</th>
               <th onclick="sortTable(1)">Short URL</th>
-              <th>Actions</th>
               <th onclick="sortTable(3)">ID</th>
+              <th>Actions</th>
               <th onclick="sortTable(0)">Original URL</th>
             </tr>
           </thead>
@@ -209,12 +210,12 @@
             listItem.innerHTML = `
         <td>${url.visitCount}</td>
         <td><a href="/${url.shortUrl}" target="_blank">${url.shortUrl}</a></td>
+        <td>${url._id}</td>
         <td class="action-btns">
           <button onclick="copyToClipboard('${url.shortUrl}')" class="btn-copy"><i class="icon-copy"></i></button> <!-- Copy URL button -->
           <button onclick="openUpdateModal('${url._id}', '${url.originalUrl}', '${url.shortUrl}')" class="btn-update"><i class="icon-pencil"></i></button>
           <button onclick="deleteUrl('${url._id}')" class="btn-delete"><i class="icon-trash"></i></button>
         </td>
-        <td>${url._id}</td>
         <td><a href="${url.originalUrl}" target="_blank">${sortUrl(url.originalUrl)}</a></td>
       `;
             urlsList.appendChild(listItem);

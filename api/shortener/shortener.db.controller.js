@@ -36,8 +36,9 @@ class ShortenerDBController {
         .slice(2, 14);
       // Guardar las notas en un archivo local
       // Define el directorio y archivo del respaldo
+      const modelName = ShortenerModel.modelName;
       const backupDir = path.resolve(__dirname, "backups"); // Carpeta "backups" dentro de tu proyecto
-      const backupPath = path.join(backupDir, `backup-${documentCount}-shorts-${newDate}.json`);
+      const backupPath = path.join(backupDir, `backup-${newDate}-${modelName}-${documentCount}.json`);
       // Asegúrate de que el directorio existe
       if (!fs.existsSync(backupDir)) {
         fs.mkdirSync(backupDir, { recursive: true });

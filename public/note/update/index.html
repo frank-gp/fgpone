@@ -7,6 +7,14 @@
     <link rel="stylesheet" href="../component/layout.css?2024_11_30" />
 
     <title>Update Note</title>
+    <style>
+      /* Estilo para eliminar la barra de desplazamiento */
+      textarea {
+        overflow: hidden; /* Oculta la barra de scroll */
+        resize: none; /* Impide que el usuario cambie manualmente el tamaño */
+        box-sizing: border-box; /* Incluye el padding en el cálculo de la altura */
+      }
+    </style>
   </head>
   <body>
     <header></header>
@@ -19,12 +27,10 @@
         <!-- Hidden input for note ID -->
 
         <div>
-          <label for="title">Title:</label>
           <input type="text" id="title" name="title" required />
         </div>
 
         <div>
-          <label for="content">Content:</label>
           <textarea id="content" name="content" rows="10" required></textarea>
         </div>
 
@@ -36,10 +42,10 @@
     </main>
     <footer></footer>
     <script src="/components/auth.js"></script>
-
     <script>
       // Function to escape HTML characters to prevent XSS
       const escapeHtml = (unsafe) => {
+        if (!unsafe) return ""; // Return an empty string for undefined/null input
         return unsafe.replace(/[&<>"']/g, (match) => {
           const escapeMap = {
             "&": "&amp;",
@@ -59,7 +65,7 @@
         const noteHTML = `
             <div class="note">
               <aside class="note_head">
-                <a href="/note/?${note._id}">ID: ${note._id}</a>
+                <a href="/note/?${note._id}" target="_blank">ID: ${note._id}</a>
                 <h2>${note.title}</h2>
               </aside>
               <pre><code>${escapeHtml(note.content)}</code></pre>
@@ -69,6 +75,28 @@
         outputElement.innerHTML += noteHTML;
       };
 
+      // Función para ajustar automáticamente la altura del textarea según el contenido
+      const autoResizeTextarea = (textarea) => {
+        textarea.style.height = "auto"; // Restablece la altura
+        textarea.style.height = `${textarea.scrollHeight}px`; // Ajusta según el contenido
+      };
+
+      // Configurar el textarea para que ajuste su tamaño dinámicamente
+      const configureAutoResize = () => {
+        const textarea = document.getElementById("content");
+
+        // Ajustar el tamaño cuando se carga el contenido inicial
+        autoResizeTextarea(textarea);
+
+        // Escuchar eventos de entrada para ajustar la altura dinámicamente
+        textarea.addEventListener("input", () => autoResizeTextarea(textarea));
+      };
+
+      // Configurar cuando se cargue la página
+      document.addEventListener("DOMContentLoaded", () => {
+        configureAutoResize();
+      });
+
       // Function to render the note data in the form
       const renderNoteForUpdate = (note) => {
         document.getElementById("note-id").value = note._id; // Set the note ID
@@ -76,14 +104,34 @@
         document.getElementById("content").value = note.content;
       };
 
+      // Función para obtener y restaurar la posición del cursor
+      const saveAndRestoreCursorPosition = (textarea) => {
+        const cursorPosition = textarea.selectionStart;
+        return () => {
+          textarea.setSelectionRange(cursorPosition, cursorPosition);
+          textarea.focus();
+        };
+      };
+
       // Function to handle updating the note
-      const updateNote = async (noteData) => {
+      const updateNote = async () => {
         try {
           const noteId = document.getElementById("note-id").value;
+          const contentTextarea = document.getElementById("content");
+
+          // Guardar la posición del cursor
+          const restoreCursor = saveAndRestoreCursorPosition(contentTextarea);
+
+          const noteData = {
+            title: document.getElementById("title").value,
+            content: document.getElementById("content").value,
+          };
+
           const response = await fetch(`/api/note/${noteId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`, // Add the token to the Authorization header
             },
             body: JSON.stringify(noteData),
           });
@@ -95,6 +143,7 @@
           if (response.ok) {
             document.getElementById("response-message").textContent = "Note updated successfully!";
             renderNoteForUpdate(data); // Optionally, update the form with the new data
+            restoreCursor();
           } else {
             document.getElementById("response-message").textContent = "Error updating note: " + data.error;
           }
@@ -122,12 +171,20 @@
       // Fetch the note data by ID
       const fetchNoteById = async (id) => {
         try {
-          const response = await fetch(`/api/note/${id}`);
+          const response = await fetch(`/api/note/${id}`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`, // Add the token to the Authorization header
+            },
+          });
+
           const data = await response.json();
+
           if (response.ok) {
             renderNoteForUpdate(data); // Populate the form with existing data
+            configureAutoResize();
           } else {
-            document.getElementById("response-message").textContent = "Error fetching note: " + data.error;
+            document.getElementById("response-message").textContent = "Error fetching note: " + (data.error || "Unknown error");
           }
         } catch (error) {
           console.error("Error fetching note:", error);
@@ -138,17 +195,31 @@
       // Form submit event listener
       document.getElementById("update-note-form").addEventListener("submit", (event) => {
         event.preventDefault();
-
-        const noteData = {
-          title: document.getElementById("title").value,
-          content: document.getElementById("content").value,
-        };
-
-        updateNote(noteData);
+        updateNote();
       });
 
       // Call this function to load the note when the page loads
       getNoteIdFromUrl();
+
+      // Detectar "Ctrl + S" o "Cmd + S"
+      document.addEventListener("keydown", async (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+          event.preventDefault(); // Prevenir la acción predeterminada del navegador (guardar la página)
+          await updateNote(); // Actualizar la nota
+          document.getElementById("response-message").textContent = "Note updated via Ctrl + S!";
+        }
+      });
+
+      // Permitir comportamiento normal del Enter dentro del textarea
+      document.getElementById("content").addEventListener("keydown", async (event) => {
+        if (event.key === "Enter" && !event.ctrlKey && !event.metaKey) {
+          // No se previene el salto de línea, comportamiento normal del Enter
+          console.log("keydown Enter");
+          // await updateNote(); // Actualizar la nota
+
+          return;
+        }
+      });
     </script>
   </body>
 </html>

@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
   secure: true, // true for 465, false for other ports
   auth: {
     user: "contact@fgp.one",
-    pass: process.env.PASSWORD1,
+    pass: process.env.MAIL_PASS_APP,
   },
 });
 

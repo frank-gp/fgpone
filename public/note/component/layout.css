@@ -81,8 +81,8 @@ section {
 .display_data .code_container * {
   font-family: monospace;
   /* font-size: 16px; */
-  margin: 0;
-  padding: 0;
+  /* margin: 0; */
+  /* padding: 0; */
 }
 
 .display_data .code_container {

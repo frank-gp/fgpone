@@ -6,7 +6,8 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
       <link rel="stylesheet" href="https://frank-gp.github.io/icon/icomoon/style.css" />
-      <link rel="stylesheet" href="./component/layout.css?2024_11_30" />
+      <link rel="stylesheet" href="./component/layout.css?2025_02_02" />
+      <script src="https://frankgp.com/component/stat.js" type="module"></script>
       <title>Note</title>
       <style>
         h2 {
@@ -17,6 +18,9 @@
         .display-none {
           display: none;
         }
+        /* code {
+          padding: 1em;
+        } */
       </style>
     </head>
     <body>
@@ -51,9 +55,15 @@
           try {
             const response = await fetch(`/api/note/search/${param}`);
             const data = await response.json();
-            console.log("data", data);
             renderNotes(data); // Renderizamos las notas filtradas
-            import("https://frankgp.com/lib/highlight.js");
+
+            // Verificar si alguna nota contiene un enlace (http:// o https://)
+            const hasLinks = data.some((note) => /(https?:\/\/[^\s]+)/.test(note.content));
+
+            // Si no hay enlaces, importar highlight.js
+            if (!hasLinks) {
+              import("https://frankgp.com/lib/highlight.js");
+            }
           } catch (error) {
             console.error("Error fetching data by param:", error);
           }
@@ -113,6 +123,11 @@
           outputElement.innerHTML = ""; // Limpiar el contenido previo
 
           notes.forEach((note) => {
+            let contentEscaped = escapeHtml(note.content);
+
+            // Convertir URLs en enlaces clicables dentro del contenido escapado
+            const contentWithLinks = contentEscaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+
             // Usamos template literals para construir el HTML
             const noteHTML = `
             <div class="note display_data ">
@@ -132,7 +147,7 @@
               </aside>
               <div class="code_container">
                 <aside class="code-editor">
-                  <pre><code class="code">${escapeHtml(note.content)}</code></pre>
+                  <pre><code class="code">${contentWithLinks}</code></pre>
                 </aside>
               </div>
             </div>

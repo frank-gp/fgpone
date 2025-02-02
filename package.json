@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "dev": "node --watch app.js",
     "start": "node app.js"
   },
   "keywords": [],
